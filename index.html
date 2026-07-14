@@ -1892,17 +1892,12 @@
     let salesPieInstance = null;
     let salesBarInstance = null;
 
-    document.addEventListener("DOMContentLoaded", () => {
-        if (typeof BANQUET_DATA === 'undefined') {
-            console.error("BANQUET_DATA is not defined!");
-            return;
-        }
-
+    document.addEventListener("DOMContentLoaded", async () => {
         // Initialize Event Listeners
         initFilterListeners();
 
         // Run Initial Dashboard Update
-        updateDashboard();
+        await initDashboard();
 
         // Search Input listener
         document.getElementById('search-input').addEventListener('input', (e) => {
