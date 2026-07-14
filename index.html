@@ -1106,118 +1106,60 @@
             }
 
             .main-row {
-                position: relative;
-                padding: 1rem 2.25rem 1rem 1rem;
-                margin-bottom: 0.75rem;
+                padding: 1.15rem 1.25rem;
+                margin-bottom: 0.85rem;
                 border: 1px solid var(--card-border);
-                border-radius: 12px;
-                background: rgba(28, 25, 23, 0.4);
+                border-radius: 16px;
+                background: rgba(28, 25, 23, 0.55);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                transition: var(--transition);
+            }
+
+            .main-row:active {
+                background: rgba(212, 175, 55, 0.05);
+                border-color: var(--gold);
             }
 
             .main-row td {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: 0.35rem 0 !important;
+                padding: 0.45rem 0 !important;
                 border: none !important;
                 background: transparent !important;
                 width: 100% !important;
                 text-align: left !important;
+                font-size: 0.85rem;
+            }
+
+            /* Custom styled header for the card (Client Name) */
+            .main-row td:first-child {
+                font-size: 1.05rem;
+                color: var(--gold);
+                font-weight: 700;
+                border-bottom: 1px solid rgba(212, 175, 55, 0.15) !important;
+                padding-bottom: 0.65rem !important;
+                margin-bottom: 0.5rem;
+                display: flex;
+                justify-content: space-between;
+                width: 100% !important;
+            }
+
+            .main-row td:first-child::before {
+                content: "👤 客户姓名";
+                color: var(--gold-light);
+                font-size: 0.8rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
             }
 
             /* Add labels before cell values on mobile */
             .main-row td:not(:first-child)::before {
-                content: attr(data-label);
+                content: attr(data-label) "：";
                 color: var(--text-secondary);
                 font-size: 0.775rem;
                 font-weight: 500;
-            }
-
-            /* Place the chevron absolute in top-right */
-            .main-row td:first-child {
-                position: absolute;
-                right: 0.85rem;
-                top: 50%;
-                transform: translateY(-50%);
-                width: auto !important;
-                padding: 0 !important;
-                display: block;
-            }
-
-            .chevron {
-                display: block;
-            }
-
-            /* Custom styling for expanded row on mobile */
-            .main-row.expanded {
-                border-color: var(--gold);
-                background: rgba(212, 175, 55, 0.05);
-                border-radius: 12px 12px 0 0;
-                margin-bottom: 0;
-            }
-
-            .detail-row {
-                display: none;
-                margin-bottom: 0.75rem;
-                border: 1px solid var(--card-border);
-                border-top: none;
-                border-radius: 0 0 12px 12px;
-                background: rgba(212, 175, 55, 0.02);
-            }
-
-            .detail-row.show {
-                display: block;
-            }
-
-            .detail-cell {
-                padding: 0 !important;
-                display: block;
-            }
-
-            .detail-container {
-                padding: 0 !important;
-            }
-
-            .detail-row.show .detail-container {
-                padding: 0 !important;
-            }
-
-            .detail-grid {
-                grid-template-columns: 1fr !important;
-                border: none !important;
-                border-radius: 0 !important;
-                background: transparent !important;
-                padding: 0.75rem 1rem !important;
-                gap: 0.75rem !important;
-            }
-
-            .detail-item {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-                padding-bottom: 0.35rem;
-            }
-
-            .detail-item:last-child {
-                border-bottom: none;
-                padding-bottom: 0;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.25rem;
-            }
-
-            .detail-key {
-                font-size: 0.775rem;
-            }
-
-            .detail-value {
-                font-size: 0.875rem;
-                text-align: right;
-            }
-
-            .detail-item[style*="grid-column: span 2"] .detail-value {
-                text-align: left;
             }
 
             /* H5 Targets styles */
