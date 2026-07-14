@@ -1285,40 +1285,7 @@
         </div>
     </header>
 
-    <!-- Filters -->
-    <div class="filters-wrapper">
-        <div class="filter-group">
-            <span class="filter-label">宴会类型</span>
-            <div class="filter-options" id="type-filters">
-                <button class="filter-btn active" data-type="all">全部卡型</button>
-                <button class="filter-btn" data-type="生日卡">生日卡</button>
-                <button class="filter-btn" data-type="订婚卡">订婚卡</button>
-            </div>
-        </div>
-        <div class="filter-group">
-            <span class="filter-label">自定义日期</span>
-            <div class="date-range-wrapper">
-                <input type="date" id="start-date" class="date-input">
-                <span class="date-separator">至</span>
-                <input type="date" id="end-date" class="date-input">
-            </div>
-        </div>
-        <div class="filter-group">
-            <span class="filter-label">快捷时间</span>
-            <div class="filter-options" id="quick-date-filters">
-                <button class="filter-btn active" data-range="all">全部</button>
-                <button class="filter-btn" data-range="today">今日</button>
-                <button class="filter-btn" data-range="yesterday">昨日</button>
-                <button class="filter-btn" data-range="this-week">本周</button>
-                <button class="filter-btn" data-range="last-week">上周</button>
-                <button class="filter-btn" data-range="this-month">本月</button>
-                <button class="filter-btn" data-range="last-month">上月</button>
-                <button class="filter-btn" data-range="this-quarter">本季度</button>
-                <button class="filter-btn" data-range="this-year">今年</button>
-                <button class="filter-btn" data-range="last-year">去年</button>
-            </div>
-        </div>
-    </div>
+
 
     <!-- KPIs -->
     <div class="kpi-grid">
@@ -1398,6 +1365,41 @@
             </div>
             <div class="chart-container">
                 <canvas id="salesBarChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-wrapper" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+        <div class="filter-group">
+            <span class="filter-label">宴会类型</span>
+            <div class="filter-options" id="type-filters">
+                <button class="filter-btn active" data-type="all">全部卡型</button>
+                <button class="filter-btn" data-type="生日卡">生日卡</button>
+                <button class="filter-btn" data-type="订婚卡">订婚卡</button>
+            </div>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">自定义日期</span>
+            <div class="date-range-wrapper">
+                <input type="date" id="start-date" class="date-input">
+                <span class="date-separator">至</span>
+                <input type="date" id="end-date" class="date-input">
+            </div>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">快捷时间</span>
+            <div class="filter-options" id="quick-date-filters">
+                <button class="filter-btn active" data-range="all">全部</button>
+                <button class="filter-btn" data-range="today">今日</button>
+                <button class="filter-btn" data-range="yesterday">昨日</button>
+                <button class="filter-btn" data-range="this-week">本周</button>
+                <button class="filter-btn" data-range="last-week">上周</button>
+                <button class="filter-btn" data-range="this-month">本月</button>
+                <button class="filter-btn" data-range="last-month">上月</button>
+                <button class="filter-btn" data-range="this-quarter">本季度</button>
+                <button class="filter-btn" data-range="this-year">今年</button>
+                <button class="filter-btn" data-range="last-year">去年</button>
             </div>
         </div>
     </div>
