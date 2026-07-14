@@ -2655,7 +2655,7 @@
         editingId = null;
     }
 
-    function saveRecord() {
+    async function saveRecord() {
         const name = document.getElementById('modal-name').value.trim();
         const phone = document.getElementById('modal-phone').value.trim();
         const owner = document.getElementById('modal-owner').value;
@@ -2688,39 +2688,38 @@
             remarks: remarks || "无"
         };
         
-        if (editingId === null) {
-            const newId = "CUSTOM_" + Date.now();
-            const today = new Date();
-            const reg_time = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
-            
-            const newRecord = {
-                id: newId,
-                ...updatedFields,
-                reg_time: reg_time
-            };
-            
-            localAdded.push(newRecord);
-            localStorage.setItem('盛世礼宴_added_records', JSON.stringify(localAdded));
-            alert("客资添加成功！");
-        } else {
-            if (String(editingId).startsWith("CUSTOM_")) {
-                localAdded = localAdded.map(item => {
-                    if (item.id === editingId) {
-                        return { ...item, ...updatedFields };
-                    }
-                    return item;
+        try {
+            let res;
+            if (editingId === null) {
+                // Add record via API
+                res = await fetch('/api/data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedFields)
                 });
-                localStorage.setItem('盛世礼宴_added_records', JSON.stringify(localAdded));
             } else {
-                localModified[editingId] = updatedFields;
-                localStorage.setItem('盛世礼宴_modified_records', JSON.stringify(localModified));
+                // Edit record via API
+                res = await fetch(`/api/data/${editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedFields)
+                });
             }
-            alert("客资修改成功！");
+            
+            const result = await res.json();
+            if (result.success) {
+                alert(editingId === null ? "客资添加成功！" : "客资修改成功！");
+                closeModal();
+                // Reload from backend and refresh dashboard view
+                await loadDataFromServer();
+                updateDashboard();
+            } else {
+                alert("保存失败：" + result.error);
+            }
+        } catch (e) {
+            console.error("Error saving record to server", e);
+            alert("网络错误，保存失败！");
         }
-        
-        rebuildDatabase();
-        closeModal();
-        updateDashboard();
     }
 
 
