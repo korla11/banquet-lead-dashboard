@@ -11,6 +11,8 @@
     
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Datalabels Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
     <style>
         :root {
@@ -1475,7 +1477,6 @@
             <table id="data-table">
                 <thead>
                     <tr>
-                        <th style="width: 50px;"></th>
                         <th>客户姓名</th>
                         <th>负责人 (销售)</th>
                         <th>宴会来源</th>
@@ -2197,6 +2198,10 @@
 
     // Render sales ranking graphs
     function renderCharts() {
+        if (typeof ChartDataLabels !== 'undefined') {
+            Chart.register(ChartDataLabels);
+        }
+
         const salesStats = {};
         filteredData.forEach(d => {
             if (d.owner) salesStats[d.owner] = (salesStats[d.owner] || 0) + 1;
@@ -2256,6 +2261,22 @@
                                 return ` ${context.label}: ${val} 单 (${percentage}%)`;
                             }
                         }
+                    },
+                    datalabels: {
+                        color: '#fafaf9',
+                        font: {
+                            family: 'Outfit, Noto Sans SC',
+                            weight: '600',
+                            size: 10
+                        },
+                        formatter: (value, ctx) => {
+                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                            return percentage > 5 ? `${value}单\n(${percentage}%)` : '';
+                        },
+                        anchor: 'center',
+                        align: 'center',
+                        textAlign: 'center'
                     }
                 },
                 cutout: '60%'
@@ -2281,10 +2302,25 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    datalabels: {
+                        color: '#fafaf9',
+                        anchor: 'end',
+                        align: 'top',
+                        offset: 4,
+                        font: {
+                            family: 'Outfit, Noto Sans SC',
+                            weight: '600',
+                            size: 11
+                        },
+                        formatter: (value) => {
+                            return value > 0 ? `${value} 单` : '';
+                        }
+                    }
                 },
                 scales: {
                     y: {
+                        grace: '15%',
                         grid: { color: 'rgba(255, 255, 255, 0.05)' },
                         ticks: { 
                             color: '#a8a29e', 
@@ -2361,12 +2397,7 @@
             const badgeClass = item.card_type === '生日卡' ? 'badge-type-1' : 'badge-type-2';
             
             return `
-                <tr class="main-row" onclick="toggleDetails(${index})">
-                    <td style="text-align: center;">
-                        <span class="chevron" id="chevron-${index}">
-                            <svg class="chevron-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-                        </span>
-                    </td>
+                <tr class="main-row" onclick="openEditModal('${item.id}', event)" style="cursor: pointer;">
                     <td data-label="客户姓名" style="font-weight: 500;">${item.name}</td>
                     <td data-label="负责人" style="color: var(--gold-light);">${item.owner}</td>
                     <td data-label="宴会来源">${item.channel}</td>
@@ -2375,47 +2406,12 @@
                     <td data-label="登记时间">${item.reg_time}</td>
                     <td data-label="卡片状态"><span class="badge badge-card-status">${item.card_status}</span></td>
                 </tr>
-                <tr class="detail-row" id="detail-row-${index}">
-                    <td colspan="8" class="detail-cell">
-                        <div class="detail-container" id="detail-container-${index}">
-                            <div class="detail-grid">
-                                <div class="detail-item">
-                                    <span class="detail-key">自动编号</span>
-                                    <span class="detail-value"><span class="badge badge-id">${item.id}</span></span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-key">联系电话</span>
-                                    <span class="detail-value" style="font-family: 'Outfit'; letter-spacing: 0.5px;">
-                                        ${item.phone || '未登记'}
-                                    </span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-key">餐标套餐</span>
-                                    <span class="detail-value">${item.package || '未约定'}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-key">宴会卡购买状态</span>
-                                    <span class="detail-value">${item.card_status}</span>
-                                </div>
-                                <div class="detail-item" style="grid-column: span 2; display: flex; justify-content: space-between; align-items: center;">
-                                    <div>
-                                        <span class="detail-key">备注信息</span>
-                                        <span class="detail-value">${item.remarks || '无'}</span>
-                                    </div>
-                                    <button class="unlock-btn" style="margin-left: auto; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.4); color: var(--gold); padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.75rem; cursor: pointer;" onclick="openEditModal('${item.id}', event)">
-                                        修改客资
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
             `;
         }).join('');
 
         const summaryRowHTML = `
             <tr class="table-summary-row">
-                <td colspan="8">
+                <td colspan="7">
                     <div class="table-summary-content">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <span style="font-size: 1.1rem;">📊</span>
@@ -2470,11 +2466,13 @@
         }
     }
 
-    let editingId = null;
-
     function openAddModal() {
         editingId = null;
         document.getElementById('modal-title').textContent = "快捷录入客资";
+        
+        // Hide metadata fields in add mode
+        document.getElementById('modal-id-container').style.display = 'none';
+        document.getElementById('modal-reg-time-container').style.display = 'none';
         
         // Reset form fields
         document.getElementById('modal-name').value = '';
@@ -2501,11 +2499,17 @@
         if (event) event.stopPropagation();
         
         editingId = id;
-        document.getElementById('modal-title').textContent = "修改客资明细";
+        document.getElementById('modal-title').textContent = "客资详细档案";
+        
+        // Show metadata fields in edit mode
+        document.getElementById('modal-id-container').style.display = 'block';
+        document.getElementById('modal-reg-time-container').style.display = 'block';
         
         const record = CURRENT_DATABASE.find(item => item.id === id);
         if (!record) return;
         
+        document.getElementById('modal-id').value = record.id || '';
+        document.getElementById('modal-reg-time').value = record.reg_time || '';
         document.getElementById('modal-name').value = record.name || '';
         document.getElementById('modal-phone').value = record.phone || '';
         
@@ -2609,37 +2613,7 @@
         updateDashboard();
     }
 
-    // Toggle details panels
-    function toggleDetails(index) {
-        const mainRow = document.querySelectorAll('.main-row')[index];
-        const detailRow = document.getElementById(`detail-row-${index}`);
-        const detailContainer = document.getElementById(`detail-container-${index}`);
-        
-        const isShown = detailRow.classList.contains('show');
 
-        // Close all other details first for accordion style (optional, let's allow multiple open for comparison, but toggle this specific one)
-        if (isShown) {
-            mainRow.classList.remove('expanded');
-            detailContainer.style.maxHeight = '0px';
-            detailContainer.style.opacity = '0';
-            setTimeout(() => {
-                detailRow.classList.remove('show');
-            }, 300); // match css transition
-        } else {
-            mainRow.classList.add('expanded');
-            detailRow.classList.add('show');
-            
-            // To animate height smoothly, we measure clientHeight of grid
-            const grid = detailContainer.querySelector('.detail-grid');
-            const height = grid.offsetHeight + 40; // add padding
-            
-            // force reflow
-            detailContainer.offsetHeight;
-            
-            detailContainer.style.maxHeight = height + 'px';
-            detailContainer.style.opacity = '1';
-        }
-    }
 
     // Export dataset to CSV
     function exportToCSV() {
@@ -2699,6 +2673,14 @@
             <button class="modal-close-btn" onclick="closeModal()">&times;</button>
         </div>
         <div class="modal-body">
+            <div class="form-group" id="modal-id-container">
+                <label for="modal-id" style="font-weight: 500;">自动编号</label>
+                <input type="text" id="modal-id" class="search-input" style="width: 100%; opacity: 0.6; cursor: not-allowed;" readonly disabled>
+            </div>
+            <div class="form-group" id="modal-reg-time-container">
+                <label for="modal-reg-time" style="font-weight: 500;">登记时间</label>
+                <input type="text" id="modal-reg-time" class="search-input" style="width: 100%; opacity: 0.6; cursor: not-allowed;" readonly disabled>
+            </div>
             <div class="form-group">
                 <label for="modal-name" style="font-weight: 500;">客户姓名 <span style="color: var(--gold);">*</span></label>
                 <input type="text" id="modal-name" class="search-input" style="width: 100%;" placeholder="请输入客户姓名">
