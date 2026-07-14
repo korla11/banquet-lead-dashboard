@@ -1692,6 +1692,8 @@
     // Local storage data persistence and synchronization
     let localAdded = [];
     let localModified = {};
+    let localAdded = [];
+    let localModified = {};
     try {
         localAdded = JSON.parse(localStorage.getItem('盛世礼宴_added_records') || '[]');
         localModified = JSON.parse(localStorage.getItem('盛世礼宴_modified_records') || '{}');
@@ -1699,24 +1701,91 @@
         console.error("Error loading local storage data", e);
     }
     
-    // Combine and build master database
+    // Combine and build master database (offline fallback)
     let CURRENT_DATABASE = [];
     function rebuildDatabase() {
         let baseData = typeof BANQUET_DATA !== 'undefined' ? JSON.parse(JSON.stringify(BANQUET_DATA)) : [];
-        
-        // Apply local modifications
         baseData = baseData.map(item => {
             if (localModified[item.id]) {
                 return { ...item, ...localModified[item.id] };
             }
             return item;
         });
-        
-        // Append local added records
         CURRENT_DATABASE = baseData.concat(localAdded);
     }
     
     rebuildDatabase();
+
+    // Load data from Express server
+    async function loadDataFromServer() {
+        try {
+            const res = await fetch('/api/data');
+            const result = await res.json();
+            if (result.success && result.records) {
+                CURRENT_DATABASE = result.records;
+                if (result.passwords) {
+                    Object.assign(USER_PASSWORDS, result.passwords);
+                }
+                return true;
+            }
+        } catch (e) {
+            console.error("Failed to load data from server, using local fallback...", e);
+        }
+        return false;
+    }
+
+    async function initDashboard() {
+        await loadDataFromServer();
+        updateDashboard();
+    }
+
+    // Excel upload handler functions
+    function triggerExcelUpload() {
+        document.getElementById('excel-file-input').click();
+    }
+
+    async function handleExcelUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        if (!confirm(`确认要上传并覆盖当前服务器上的原始数据吗？\n上传文件: ${file.name}`)) {
+            event.target.value = '';
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try {
+            const btn = document.getElementById('admin-upload-btn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '正在上传...';
+            
+            const res = await fetch('/api/upload-excel', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await res.json();
+            if (result.success) {
+                alert(`上传成功！已成功解析导入 Excel 新客资数据！`);
+                await loadDataFromServer();
+                updateDashboard();
+            } else {
+                alert(`上传解析失败：` + result.error);
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        } catch (e) {
+            console.error("Error uploading Excel file", e);
+            alert("网络错误，文件上传失败！");
+            document.getElementById('admin-upload-btn').disabled = false;
+        }
+        
+        event.target.value = '';
+    }
 
     // Targets configuration
     const TARGET_CONFIG = {
@@ -1749,17 +1818,17 @@
 
     let activeTargetTab = 'sales';
     const USER_PASSWORDS = {
-  "李冰冰": "8076",
-  "冯玲": "2418",
-  "郭楠": "9724",
-  "张议丹": "5679",
-  "徐俊强": "7307",
-  "统筹": "1025",
-  "灯光": "8276",
-  "前厅": "2208",
-  "后厨": "7721",
-  "行政": "9574"
-};
+        "李冰冰": "8076",
+        "冯玲": "2418",
+        "郭楠": "9724",
+        "张议丹": "5679",
+        "徐俊强": "7307",
+        "统筹": "1025",
+        "灯光": "8276",
+        "前厅": "2208",
+        "后厨": "7721",
+        "行政": "9574"
+    };
     let loggedInUser = null;
     const ADMIN_PASSWORD = "0808"; // default admin password
 
@@ -1791,6 +1860,14 @@
                 <span style="font-size: 0.85rem; color: var(--gold-light);">当前登录: <strong>${loggedInUser}</strong></span>
                 <button class="logout-btn" onclick="handleLogout()">退出登录</button>
             `;
+            
+            // Show Excel upload button if logged in as Admin
+            if (loggedInUser === "系统管理员") {
+                document.getElementById('admin-upload-btn').style.display = 'inline-flex';
+            } else {
+                document.getElementById('admin-upload-btn').style.display = 'none';
+            }
+            
             passwordInput.value = '';
             renderTable();
         } else {
@@ -1803,6 +1880,9 @@
         document.getElementById('login-overlay').style.display = 'flex';
         document.getElementById('login-password').value = '';
         document.getElementById('user-profile-info').innerHTML = '';
+        
+        // Hide Excel upload button
+        document.getElementById('admin-upload-btn').style.display = 'none';
         
         setTimeout(() => {
             const input = document.getElementById('login-password');
