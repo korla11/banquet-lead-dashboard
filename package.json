@@ -1,0 +1,16 @@
+{
+  "name": "banquet-lead-dashboard",
+  "version": "1.0.0",
+  "description": "盛世礼宴小宴会客资管理看板 - 联机多端同步版",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "xlsx": "^0.18.5"
+  }
+}
