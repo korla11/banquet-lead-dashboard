@@ -2216,42 +2216,90 @@
 
         if (labels.length === 0) return;
 
-        // Gold-themed colors
-        const goldColors = [
-            'rgba(212, 175, 55, 0.85)',   // Rich Gold
-            'rgba(179, 143, 77, 0.85)',   // Bronze Gold
-            'rgba(243, 229, 171, 0.85)',  // Champagne Gold
-            'rgba(115, 96, 54, 0.85)',    // Muted Gold
-            'rgba(168, 162, 158, 0.7)'    // Warm Gray
+        // Colors matching Image 2's palette
+        const pieColors = [
+            '#e2a566', // Orange/gold
+            '#c864d8', // Purple
+            '#a4b2b6', // Slate blue/gray
+            '#d4af37', // Gold
+            '#736036', // Muted gold
+            '#8fbc8f', // Dark sea green
+            '#db7093'  // Pale violet red
         ];
-        const goldBorders = goldColors.map(c => c.replace('0.85', '1').replace('0.7', '1'));
 
-        // Pie chart
+        // Custom plugin for drawing callout connector lines for the pie chart
+        const pieConnectorsPlugin = {
+            id: 'pieConnectors',
+            afterDraw(chart) {
+                const ctx = chart.ctx;
+                ctx.save();
+                const dataset = chart.data.datasets[0];
+                const meta = chart.getDatasetMeta(0);
+                
+                if (!meta.data || meta.data.length === 0) return;
+                
+                meta.data.forEach((arc, i) => {
+                    const val = dataset.data[i];
+                    if (!val || val === 0) return;
+                    
+                    const centerAngle = arc.startAngle + (arc.endAngle - arc.startAngle) / 2;
+                    const cx = arc.x !== undefined ? arc.x : chart.width / 2;
+                    const cy = arc.y !== undefined ? arc.y : chart.height / 2;
+                    const outerRadius = arc.outerRadius !== undefined ? arc.outerRadius : Math.min(chart.width, chart.height) / 4;
+                    
+                    // Line start point on outer edge of the slice
+                    const startX = cx + Math.cos(centerAngle) * outerRadius;
+                    const startY = cy + Math.sin(centerAngle) * outerRadius;
+                    
+                    // Intermediate line point
+                    const midX = cx + Math.cos(centerAngle) * (outerRadius + 14);
+                    const midY = cy + Math.sin(centerAngle) * (outerRadius + 14);
+                    
+                    // End line point (horizontal segment)
+                    const isLeft = Math.cos(centerAngle) < 0;
+                    const endX = midX + (isLeft ? -10 : 10);
+                    const endY = midY;
+                    
+                    // Draw path
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(midX, midY);
+                    ctx.lineTo(endX, endY);
+                    ctx.strokeStyle = arc.options.backgroundColor || '#fafaf9';
+                    ctx.lineWidth = 1.2;
+                    ctx.stroke();
+                });
+                ctx.restore();
+            }
+        };
+
+        // Pie chart (solid pie with callouts matching Image 2)
         const ctxPie = document.getElementById('salesPieChart').getContext('2d');
         salesPieInstance = new Chart(ctxPie, {
-            type: 'doughnut',
+            type: 'pie',
+            plugins: [pieConnectorsPlugin],
             data: {
                 labels: labels,
                 datasets: [{
                     data: counts,
-                    backgroundColor: goldColors.slice(0, labels.length),
-                    borderColor: goldBorders.slice(0, labels.length),
+                    backgroundColor: pieColors.slice(0, labels.length),
+                    borderColor: 'rgba(12, 10, 9, 0.4)',
                     borderWidth: 1.5
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 45,
+                        right: 45,
+                        top: 25,
+                        bottom: 25
+                    }
+                },
                 plugins: {
-                    legend: {
-                        position: window.innerWidth < 600 ? 'bottom' : 'right',
-                        labels: {
-                            color: '#a8a29e',
-                            font: { family: 'Outfit, Noto Sans SC', size: window.innerWidth < 600 ? 11 : 12 },
-                            padding: window.innerWidth < 600 ? 8 : 15,
-                            boxWidth: window.innerWidth < 600 ? 10 : 14
-                        }
-                    },
+                    legend: { display: false }, // Callouts show label names, hide legend box
                     tooltip: {
                         callbacks: {
                             label: function(context) {
@@ -2263,74 +2311,106 @@
                         }
                     },
                     datalabels: {
-                        color: '#fafaf9',
+                        color: (context) => {
+                            // Match label color to slice color
+                            return context.dataset.backgroundColor[context.dataIndex];
+                        },
                         font: {
                             family: 'Outfit, Noto Sans SC',
-                            weight: '600',
-                            size: 10
+                            weight: '500',
+                            size: 11
                         },
                         formatter: (value, ctx) => {
+                            const label = ctx.chart.data.labels[ctx.dataIndex];
                             const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                            return percentage > 5 ? `${value}单\n(${percentage}%)` : '';
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${label}, ${value}, ${percentage}%`;
                         },
-                        anchor: 'center',
-                        align: 'center',
-                        textAlign: 'center'
+                        anchor: 'end',
+                        align: (context) => {
+                            const arc = context.chart.getDatasetMeta(0).data[context.dataIndex];
+                            const centerAngle = arc.startAngle + (arc.endAngle - arc.startAngle) / 2;
+                            return Math.cos(centerAngle) < 0 ? 'left' : 'right';
+                        },
+                        offset: 18
                     }
-                },
-                cutout: '60%'
+                }
             }
         });
 
-        // Bar chart
+        // Bar chart (horizontal bars with horizontal gradients matching Image 1)
         const ctxBar = document.getElementById('salesBarChart').getContext('2d');
+        
+        // Create horizontal linear gradient
+        const gradient = ctxBar.createLinearGradient(0, 0, 320, 0);
+        gradient.addColorStop(0, 'rgba(180, 140, 80, 0.6)'); // darker bronze
+        gradient.addColorStop(1, 'rgba(212, 175, 55, 0.95)'); // bright gold
+
         salesBarInstance = new Chart(ctxBar, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: '获客订单量',
+                    label: '销售总量',
                     data: counts,
-                    backgroundColor: 'rgba(212, 175, 55, 0.7)',
+                    backgroundColor: gradient,
                     borderColor: 'rgba(212, 175, 55, 1)',
-                    borderWidth: 1.5,
+                    borderWidth: 1.2,
                     borderRadius: 6
                 }]
             },
             options: {
+                indexAxis: 'y', // horizontal bar chart
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        right: 35 // prevent datalabels from clipping
+                    }
+                },
                 plugins: {
-                    legend: { display: false },
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        align: 'center',
+                        labels: {
+                            color: '#fafaf9',
+                            boxWidth: 12,
+                            boxHeight: 12,
+                            font: { family: 'Outfit, Noto Sans SC', size: 12 }
+                        }
+                    },
                     datalabels: {
                         color: '#fafaf9',
                         anchor: 'end',
-                        align: 'top',
-                        offset: 4,
+                        align: 'right',
+                        offset: 8,
                         font: {
                             family: 'Outfit, Noto Sans SC',
-                            weight: '600',
-                            size: 11
+                            weight: '500',
+                            size: 13
                         },
                         formatter: (value) => {
-                            return value > 0 ? `${value} 单` : '';
+                            return value;
                         }
                     }
                 },
                 scales: {
-                    y: {
-                        grace: '15%',
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    x: {
+                        grace: '10%',
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' }, // vertical grids
                         ticks: { 
-                            color: '#a8a29e', 
+                            color: '#fafaf9', 
                             stepSize: 1,
                             font: { family: 'Outfit, Noto Sans SC' } 
                         }
                     },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#a8a29e', font: { family: 'Outfit, Noto Sans SC', size: 12 } }
+                    y: {
+                        grid: { display: false }, // no horizontal grids
+                        ticks: { 
+                            color: '#fafaf9', 
+                            font: { family: 'Outfit, Noto Sans SC', size: 12 } 
+                        }
                     }
                 }
             }
