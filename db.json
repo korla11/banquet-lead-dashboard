@@ -197,6 +197,16 @@
       "remarks": "无"
     }
   ],
-  "custom_records": [],
+  "custom_records": [
+    {
+      "name": "测试顾客",
+      "phone": "13333333333",
+      "owner": "郭楠",
+      "card_type": "生日卡",
+      "card_status": "未收款",
+      "id": "CUSTOM_1784028214482",
+      "reg_time": "2026年7月14日"
+    }
+  ],
   "modified_records": {}
 }
