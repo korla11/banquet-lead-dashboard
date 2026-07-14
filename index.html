@@ -1,0 +1,2759 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>盛世礼宴小宴会客资管理看板</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0c0a09;
+            --card-bg: rgba(28, 25, 23, 0.7);
+            --card-border: rgba(212, 175, 55, 0.15);
+            --card-border-hover: rgba(212, 175, 55, 0.35);
+            --text-primary: #fafaf9;
+            --text-secondary: #a8a29e;
+            --gold: #d4af37;
+            --gold-light: #f3e5ab;
+            --gold-glow: rgba(212, 175, 55, 0.25);
+            --success: #10b981;
+            --danger: #ef4444;
+            --font-family: 'Outfit', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 5% 5%, rgba(212, 175, 55, 0.06) 0%, transparent 35%),
+                radial-gradient(circle at 95% 95%, rgba(179, 143, 77, 0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            min-height: 100vh;
+            padding: 2.5rem 2rem;
+            line-height: 1.6;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 1.75rem 2.25rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .header-title h1 {
+            font-size: 1.85rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, var(--gold-light) 60%, var(--gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.35rem;
+            letter-spacing: 0.5px;
+        }
+
+        .header-title p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-title p::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: var(--gold);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--gold);
+        }
+
+        /* Filter Section */
+        .filters-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 1.5rem 2.25rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-label {
+            font-size: 0.925rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            min-width: 90px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-secondary);
+            padding: 0.55rem 1.4rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .filter-btn:hover {
+            background: rgba(212, 175, 55, 0.05);
+            color: var(--text-primary);
+            border-color: rgba(212, 175, 55, 0.25);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--gold) 0%, #b38f4d 100%);
+            border-color: var(--gold);
+            color: #000;
+            font-weight: 600;
+            box-shadow: 0 0 15px var(--gold-glow);
+        }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.35);
+            transition: var(--transition);
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--card-border-hover);
+            box-shadow: 0 15px 45px 0 rgba(212, 175, 55, 0.1);
+        }
+
+        .kpi-info h3 {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 0.65rem;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-info .kpi-value {
+            font-size: 2.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #fff 40%, var(--gold-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .kpi-info .kpi-subtext {
+            font-size: 0.775rem;
+            color: var(--text-secondary);
+            margin-top: 0.35rem;
+        }
+
+        .kpi-icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(212, 175, 55, 0.08);
+            color: var(--gold);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            box-shadow: inset 0 0 10px rgba(212, 175, 55, 0.05);
+        }
+
+        /* Charts Row */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1.25fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 968px) {
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 1.75rem;
+            box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.35);
+            display: flex;
+            flex-direction: column;
+            height: 420px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-header h2 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+            border-left: 3px solid var(--gold);
+            padding-left: 0.75rem;
+        }
+
+        .chart-container {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+        }
+
+        /* Data Table Container */
+        .table-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 1.75rem;
+            box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.35);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .table-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .table-title h2 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            border-left: 3px solid var(--gold);
+            padding-left: 0.75rem;
+        }
+
+        .table-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            padding: 0.55rem 1.15rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            outline: none;
+            transition: var(--transition);
+            min-width: 220px;
+        }
+
+        .search-input:focus {
+            border-color: var(--gold);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 12px var(--gold-glow);
+        }
+
+        .select-input {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            padding: 0.55rem 2.25rem 0.55rem 1.15rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            outline: none;
+            cursor: pointer;
+            transition: var(--transition);
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath stroke='%23a8a29e' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.2em;
+        }
+
+        .select-input:focus {
+            border-color: var(--gold);
+            background-color: #1c1917;
+        }
+
+        .select-input option {
+            background: #1c1917;
+            color: var(--text-primary);
+        }
+
+        .export-btn {
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            color: var(--gold-light);
+            padding: 0.55rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .export-btn:hover {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--gold);
+        }
+
+        /* Foldable Table Styles */
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.015);
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 1.15rem 1.25rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+            letter-spacing: 0.5px;
+        }
+
+        .main-row {
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .main-row td {
+            padding: 1.15rem 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-primary);
+        }
+
+        .main-row:hover td {
+            background: rgba(212, 175, 55, 0.03);
+        }
+
+        /* Active expanded row */
+        .main-row.expanded td {
+            background: rgba(212, 175, 55, 0.05);
+            border-bottom-color: transparent;
+        }
+
+        /* Expand Chevron */
+        .chevron {
+            transition: transform 0.3s ease;
+            color: var(--text-secondary);
+        }
+
+        .expanded .chevron {
+            transform: rotate(180deg);
+            color: var(--gold);
+        }
+
+        /* Collapsed detail sub-row */
+        .detail-row {
+            display: none;
+        }
+
+        .detail-row.show {
+            display: table-row;
+        }
+
+        .detail-cell {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            background: rgba(212, 175, 55, 0.02);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .detail-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s ease, opacity 0.3s ease;
+            padding: 0;
+            opacity: 0;
+        }
+
+        .detail-row.show .detail-container {
+            max-height: 500px;
+            padding: 1.25rem;
+            opacity: 1;
+        }
+
+        /* Detail Panel Grid */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.25rem 2rem;
+            background: rgba(28, 25, 23, 0.6);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 12px;
+            padding: 1.25rem 1.75rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .detail-key {
+            font-size: 0.775rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 0.925rem;
+            color: var(--text-primary);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.775rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-type-1 {
+            background: rgba(212, 175, 55, 0.12);
+            color: var(--gold-light);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .badge-type-2 {
+            background: rgba(168, 162, 158, 0.15);
+            color: #d6d3d1;
+            border: 1px solid rgba(168, 162, 158, 0.25);
+        }
+
+        .badge-card-status {
+            background: rgba(16, 185, 129, 0.1);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.18);
+        }
+
+        .badge-id {
+            font-family: 'Outfit', sans-serif;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 3.5rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Chevron SVG Icon */
+        .chevron-icon {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Login Overlay styles */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(12, 10, 9, 0.95);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: var(--transition);
+        }
+
+        .login-card {
+            background: rgba(28, 25, 23, 0.95);
+            border: 1px solid var(--gold);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 420px;
+            max-width: 95%;
+            box-shadow: 0 15px 50px rgba(212, 175, 55, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .login-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            background: linear-gradient(135deg, #fff 0%, var(--gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.25rem;
+            letter-spacing: 0.5px;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, var(--gold) 0%, #b38f4d 100%);
+            border: none;
+            color: #000;
+            padding: 0.75rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .login-btn:hover {
+            box-shadow: 0 0 15px var(--gold-glow);
+            transform: translateY(-2px);
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.25);
+            border-color: #ef4444;
+        }
+
+        .date-range-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .date-input {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            padding: 0.5rem 0.75rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            outline: none;
+            transition: var(--transition);
+            color-scheme: dark;
+        }
+
+        .date-input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 12px var(--gold-glow);
+        }
+
+        .date-separator {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Targets & Progress styles */
+        .target-section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 1.75rem;
+            box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.35);
+        }
+
+        .target-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+            padding-bottom: 0.75rem;
+        }
+
+        .target-tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .target-tab-btn:hover {
+            color: var(--gold-light);
+        }
+
+        .target-tab-btn.active {
+            color: var(--gold);
+        }
+
+        .target-tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.85rem;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--gold);
+            border-radius: 9999px;
+            box-shadow: 0 0 8px var(--gold-glow);
+        }
+
+        .progress-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem 2rem;
+        }
+
+        .progress-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+        }
+
+        .progress-name {
+            font-weight: 600;
+        }
+
+        .progress-numbers {
+            color: var(--text-secondary);
+        }
+
+        .progress-bar-track {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 9999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #b38f4d 0%, var(--gold) 100%);
+            border-radius: 9999px;
+            width: 0%;
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 8px var(--gold-glow);
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(12, 10, 9, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: var(--transition);
+        }
+
+        .modal-card {
+            background: rgba(28, 25, 23, 0.98);
+            border: 1px solid var(--gold);
+            border-radius: 20px;
+            width: 550px;
+            max-width: 95%;
+            box-shadow: 0 15px 50px rgba(212, 175, 55, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            line-height: 1;
+        }
+
+        .modal-close-btn:hover {
+            color: var(--gold-light);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            max-height: 65vh;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .modal-body .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.15);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        /* Pagination container */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.25rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-size-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .page-size-select {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            border-radius: 6px;
+            padding: 0.25rem 0.5rem;
+            outline: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .page-size-select:focus {
+            border-color: var(--gold);
+        }
+
+        .page-nav-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .page-btn {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            border-radius: 6px;
+            padding: 0.35rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-info-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-family: 'Outfit';
+        }
+
+        /* Summary Row styles */
+        .table-summary-row {
+            background: rgba(212, 175, 55, 0.05);
+            border-top: 2px solid rgba(212, 175, 55, 0.3);
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .table-summary-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.85rem 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .summary-stats-wrapper {
+            display: flex;
+            gap: 1.75rem;
+            align-items: center;
+        }
+
+        .summary-stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .summary-separator {
+            width: 1px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* H5 Mobile Responsive Styling */
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem 0.75rem;
+            }
+
+            .container {
+                gap: 1.5rem;
+            }
+
+            header {
+                padding: 1.15rem 1.5rem;
+            }
+
+            .header-title h1 {
+                font-size: 1.45rem;
+            }
+
+            .filters-wrapper {
+                padding: 1.15rem 1.5rem;
+            }
+
+            .filter-group {
+                gap: 0.75rem;
+            }
+
+            .filter-label {
+                min-width: auto;
+                width: 100%;
+                margin-bottom: 0.25rem;
+            }
+
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+            }
+
+            .kpi-card {
+                padding: 1.15rem 1rem;
+                border-radius: 14px;
+            }
+
+            .kpi-info h3 {
+                font-size: 0.75rem;
+                margin-bottom: 0.35rem;
+            }
+
+            .kpi-info .kpi-value {
+                font-size: 1.45rem;
+            }
+
+            .kpi-info .kpi-subtext {
+                font-size: 0.7rem;
+            }
+
+            .kpi-icon-box {
+                width: 38px;
+                height: 38px;
+                border-radius: 10px;
+                padding: 0;
+            }
+
+            .kpi-icon-box svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            .charts-row {
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+            }
+
+            .chart-card {
+                height: 320px;
+                padding: 1.25rem 1.15rem;
+                border-radius: 16px;
+            }
+
+            .table-card {
+                padding: 1.25rem 1.15rem;
+                border-radius: 16px;
+            }
+
+            .table-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .table-actions {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.75rem;
+            }
+
+            .search-input, .select-input, .export-btn, .date-input {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .date-range-wrapper {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            /* Responsive folding table cards for mobile */
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+
+            thead {
+                display: none;
+            }
+
+            .main-row {
+                position: relative;
+                padding: 1rem 2.25rem 1rem 1rem;
+                margin-bottom: 0.75rem;
+                border: 1px solid var(--card-border);
+                border-radius: 12px;
+                background: rgba(28, 25, 23, 0.4);
+            }
+
+            .main-row td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.35rem 0 !important;
+                border: none !important;
+                background: transparent !important;
+                width: 100% !important;
+                text-align: left !important;
+            }
+
+            /* Add labels before cell values on mobile */
+            .main-row td:not(:first-child)::before {
+                content: attr(data-label);
+                color: var(--text-secondary);
+                font-size: 0.775rem;
+                font-weight: 500;
+            }
+
+            /* Place the chevron absolute in top-right */
+            .main-row td:first-child {
+                position: absolute;
+                right: 0.85rem;
+                top: 50%;
+                transform: translateY(-50%);
+                width: auto !important;
+                padding: 0 !important;
+                display: block;
+            }
+
+            .chevron {
+                display: block;
+            }
+
+            /* Custom styling for expanded row on mobile */
+            .main-row.expanded {
+                border-color: var(--gold);
+                background: rgba(212, 175, 55, 0.05);
+                border-radius: 12px 12px 0 0;
+                margin-bottom: 0;
+            }
+
+            .detail-row {
+                display: none;
+                margin-bottom: 0.75rem;
+                border: 1px solid var(--card-border);
+                border-top: none;
+                border-radius: 0 0 12px 12px;
+                background: rgba(212, 175, 55, 0.02);
+            }
+
+            .detail-row.show {
+                display: block;
+            }
+
+            .detail-cell {
+                padding: 0 !important;
+                display: block;
+            }
+
+            .detail-container {
+                padding: 0 !important;
+            }
+
+            .detail-row.show .detail-container {
+                padding: 0 !important;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr !important;
+                border: none !important;
+                border-radius: 0 !important;
+                background: transparent !important;
+                padding: 0.75rem 1rem !important;
+                gap: 0.75rem !important;
+            }
+
+            .detail-item {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+                padding-bottom: 0.35rem;
+            }
+
+            .detail-item:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
+
+            .detail-key {
+                font-size: 0.775rem;
+            }
+
+            .detail-value {
+                font-size: 0.875rem;
+                text-align: right;
+            }
+
+            .detail-item[style*="grid-column: span 2"] .detail-value {
+                text-align: left;
+            }
+
+            /* H5 Targets styles */
+            .target-section {
+                padding: 1.25rem 1.15rem;
+                border-radius: 16px;
+            }
+
+            .target-tabs {
+                gap: 0.5rem;
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+            }
+
+            .target-tab-btn {
+                font-size: 0.9rem;
+                padding: 0.5rem 0.5rem;
+                white-space: nowrap;
+            }
+
+            .target-tab-btn.active::after {
+                bottom: -0.6rem;
+            }
+
+            .progress-list {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            /* H5 Pagination and Modal */
+            .pagination-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.75rem;
+                width: 100%;
+            }
+            .modal-body {
+                grid-template-columns: 1fr;
+                max-height: 55vh;
+            }
+            .modal-body .form-group.full-width {
+                grid-column: span 1;
+            }
+
+            /* H5 Summary Row styles */
+            .table-summary-row {
+                display: block !important;
+                margin-top: 1rem;
+                border: 1px solid rgba(212, 175, 55, 0.25) !important;
+                border-radius: 12px;
+                background: rgba(28, 25, 23, 0.5) !important;
+                padding: 0.25rem 0;
+            }
+            .table-summary-row td {
+                display: block !important;
+                padding: 0 !important;
+                border: none !important;
+                width: 100% !important;
+            }
+            .table-summary-content {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 0.75rem;
+                padding: 1rem !important;
+            }
+            .summary-stats-wrapper {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 0.5rem !important;
+                width: 100%;
+            }
+            .summary-stat-item {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+                font-size: 0.85rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                padding-bottom: 0.35rem;
+            }
+            .summary-stat-item:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+            .summary-separator {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Login Overlay -->
+<div class="login-overlay" id="login-overlay">
+    <div class="login-card">
+        <div class="login-header">
+            <h2>盛世礼宴小宴会客资管理系统</h2>
+            <p>请输入销售或部门密码登录系统</p>
+        </div>
+        <div class="form-group">
+            <label for="login-password">管理密码</label>
+            <input type="password" id="login-password" class="search-input" style="width: 100%;" placeholder="请输入管理密码以识别登录..." autocomplete="current-password">
+        </div>
+        <button class="login-btn" onclick="handleLogin()">确认登录</button>
+
+    </div>
+</div>
+
+<div class="container">
+    <!-- Header -->
+    <header>
+        <div class="header-title">
+            <h1>盛世礼宴小宴会客资管理看板</h1>
+            <p>数据源已加载 · 宴会卡购买及销售排行分析</p>
+        </div>
+        <div id="user-profile-info" style="display: flex; align-items: center; gap: 1rem;">
+            <!-- Injected by login JS -->
+        </div>
+    </header>
+
+    <!-- Filters -->
+    <div class="filters-wrapper">
+        <div class="filter-group">
+            <span class="filter-label">宴会类型</span>
+            <div class="filter-options" id="type-filters">
+                <button class="filter-btn active" data-type="all">全部卡型</button>
+                <button class="filter-btn" data-type="生日卡">生日卡</button>
+                <button class="filter-btn" data-type="订婚卡">订婚卡</button>
+            </div>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">自定义日期</span>
+            <div class="date-range-wrapper">
+                <input type="date" id="start-date" class="date-input">
+                <span class="date-separator">至</span>
+                <input type="date" id="end-date" class="date-input">
+            </div>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">快捷时间</span>
+            <div class="filter-options" id="quick-date-filters">
+                <button class="filter-btn active" data-range="all">全部</button>
+                <button class="filter-btn" data-range="today">今日</button>
+                <button class="filter-btn" data-range="yesterday">昨日</button>
+                <button class="filter-btn" data-range="this-week">本周</button>
+                <button class="filter-btn" data-range="last-week">上周</button>
+                <button class="filter-btn" data-range="this-month">本月</button>
+                <button class="filter-btn" data-range="last-month">上月</button>
+                <button class="filter-btn" data-range="this-quarter">本季度</button>
+                <button class="filter-btn" data-range="this-year">今年</button>
+                <button class="filter-btn" data-range="last-year">去年</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+        <!-- KPI 1 -->
+        <div class="kpi-card">
+            <div class="kpi-info">
+                <h3>总客资卡片数</h3>
+                <div class="kpi-value" id="kpi-total">-</div>
+                <div class="kpi-subtext" id="kpi-total-sub">生日卡 / 订婚卡</div>
+            </div>
+            <div class="kpi-icon-box">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="7" y1="16" x2="13" y2="16"/></svg>
+            </div>
+        </div>
+        <!-- KPI 2 -->
+        <div class="kpi-card">
+            <div class="kpi-info">
+                <h3>已收款卡片</h3>
+                <div class="kpi-value" id="kpi-paid">-</div>
+                <div class="kpi-subtext" id="kpi-paid-rate">收款率 100%</div>
+            </div>
+            <div class="kpi-icon-box" style="color: var(--success); border-color: rgba(16, 185, 129, 0.2); background: rgba(16, 185, 129, 0.08);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+        </div>
+        <!-- KPI 3 -->
+        <div class="kpi-card">
+            <div class="kpi-info">
+                <h3>销售冠军</h3>
+                <div class="kpi-value" id="kpi-champion" style="font-size: 1.6rem; height: 50px; display: flex; align-items: center;">-</div>
+                <div class="kpi-subtext" id="kpi-champion-count">完成客资 --</div>
+            </div>
+            <div class="kpi-icon-box">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            </div>
+        </div>
+        <!-- KPI 4 -->
+        <div class="kpi-card">
+            <div class="kpi-info">
+                <h3>最近登记日期</h3>
+                <div class="kpi-value" id="kpi-latest-date" style="font-size: 1.45rem; height: 50px; display: flex; align-items: center;">-</div>
+                <div class="kpi-subtext" id="kpi-latest-count">本日新增 --</div>
+            </div>
+            <div class="kpi-icon-box">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Targets & Progress -->
+    <div class="target-section">
+        <div class="target-tabs">
+            <button class="target-tab-btn active" onclick="switchTargetTab('sales')">销售个人任务进度</button>
+            <button class="target-tab-btn" onclick="switchTargetTab('dept')">部门全年任务进度</button>
+        </div>
+        <div class="progress-list" id="target-progress-list">
+            <!-- Progress items dynamically loaded here -->
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-row">
+        <!-- Sales Pie Chart -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h2>销售业绩分布 (扇形看图)</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="salesPieChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Sales Bar Chart -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h2>销售业绩排名 (柱状看图)</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="salesBarChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collapsible Data Table Card -->
+    <div class="table-card">
+        <div class="table-toolbar">
+            <div class="table-title">
+                <h2>客资明细数据</h2>
+            </div>
+            <div class="table-actions">
+                <input type="text" id="search-input" class="search-input" placeholder="搜索姓名或销售人员...">
+                <button onclick="openAddModal()" class="export-btn" style="background: linear-gradient(135deg, var(--gold) 0%, #b38f4d 100%); color: #000; border: none; font-weight: 600; padding: 0.5rem 1rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    快捷录入客资
+                </button>
+                <button id="export-btn" class="export-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    导出CSV
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;"></th>
+                        <th>客户姓名</th>
+                        <th>负责人 (销售)</th>
+                        <th>宴会来源</th>
+                        <th>卡片类型</th>
+                        <th>宴会日期</th>
+                        <th>登记时间</th>
+                        <th>状态</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Rows generated here -->
+                </tbody>
+            </table>
+            <div id="table-empty" class="empty-state" style="display: none;">
+                暂无匹配的小宴会客资卡数据
+            </div>
+        </div>
+        
+        <!-- Pagination controls -->
+        <div class="pagination-container">
+            <div class="page-size-wrapper">
+                <span>每页显示:</span>
+                <select id="page-size-select" class="page-size-select" onchange="changePageSize(this.value)">
+                    <option value="10" selected>10条</option>
+                    <option value="50">50条</option>
+                    <option value="100">100条</option>
+                </select>
+            </div>
+            <div class="page-nav-wrapper">
+                <button id="prev-page-btn" class="page-btn" onclick="prevPage()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                    上一页
+                </button>
+                <span id="page-info" class="page-info-text">第 1 / 1 页</span>
+                <button id="next-page-btn" class="page-btn" onclick="nextPage()">
+                    下一页
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Injected by script compiler
+    const BANQUET_DATA = [
+  {
+    "id": "00720260713",
+    "channel": "线下来源",
+    "owner": "冰冰",
+    "name": "何飞宇",
+    "phone": "未填",
+    "raw_type": "生日宴",
+    "card_type": "生日卡",
+    "banquet_date": "未定",
+    "package": "未选定",
+    "card_status": "已购买（已收款）",
+    "reg_time": "2026年7月13日",
+    "remarks": "无"
+  },
+  {
+    "id": "00820260713",
+    "channel": "线下来源",
+    "owner": "冰冰",
+    "name": "王总",
+    "phone": "未填",
+    "raw_type": "生日宴",
+    "card_type": "生日卡",
+    "banquet_date": "未定",
+    "package": "未选定",
+    "card_status": "已购买（已收款）",
+    "reg_time": "2026年7月13日",
+    "remarks": "无"
+  },
+  {
+    "id": "00920260713",
+    "channel": "线下来源",
+    "owner": "冰冰",
+    "name": "苏晨",
+    "phone": "未填",
+    "raw_type": "生日宴",
+    "card_type": "生日卡",
+    "banquet_date": "未定",
+    "package": "未选定",
+    "card_status": "已购买（已收款）",
+    "reg_time": "2026年7月13日",
+    "remarks": "无"
+  },
+  {
+    "id": "01020260713",
+    "channel": "线下来源",
+    "owner": "冰冰",
+    "name": "张高雅",
+    "phone": "未填",
+    "raw_type": "生日宴",
+    "card_type": "生日卡",
+    "banquet_date": "未定",
+    "package": "未选定",
+    "card_status": "已购买（已收款）",
+    "reg_time": "2026年7月13日",
+    "remarks": "无"
+  },
+  {
+    "id": "01120260713",
+    "channel": "线下来源",
+    "owner": "冰冰",
+    "name": "柳总",
+    "phone": "未填",
+    "raw_type": "生日宴",
+    "card_type": "生日卡",
+    "banquet_date": "未定",
+    "package": "未选定",
+    "card_status": "已购买（已收款）",
+    "reg_time": "2026年7月13日",
+    "remarks": "无"
+  },
+  {
+    "id": "01220260713",
+    "channel": "线下来源",
+    "owner": "冰冰",
+    "name": "汪总",
+    "phone": "未填",
+    "raw_type": "生日宴",
+    "card_type": "生日卡",
+    "banquet_date": "未定",
+    "package": "未选定",
+    "card_status": "已购买（已收款）",
+    "reg_time": "2026年7月13日",
+    "remarks": "无"
+  },
+  {
+    "id": "01320260713",
+    "channel": "线下来源",
+    "owner": "冰冰",
+    "name": "鑫子",
+    "phone": "未填",
+    "raw_type": "生日宴",
+    "card_type": "生日卡",
+    "banquet_date": "未定",
+    "package": "未选定",
+    "card_status": "已购买（已收款）",
+    "reg_time": "2026年7月13日",
+    "remarks": "无"
+  },
+  {
+    "id": "01420260713",
+    "channel": "线下来源",
+    "owner": "冰冰",
+    "name": "付超",
+    "phone": "未填",
+    "raw_type": "生日宴",
+    "card_type": "生日卡",
+    "banquet_date": "未定",
+    "package": "未选定",
+    "card_status": "已购买（已收款）",
+    "reg_time": "2026年7月13日",
+    "remarks": "无"
+  },
+  {
+    "id": "01520260713",
+    "channel": "线下来源",
+    "owner": "冯玲",
+    "name": "张伟",
+    "phone": "13503761761",
+    "raw_type": "生日宴",
+    "card_type": "生日卡",
+    "banquet_date": "未定",
+    "package": "未选定",
+    "card_status": "已购买（已收款）",
+    "reg_time": "2026年7月13日",
+    "remarks": "无"
+  },
+  {
+    "id": "01620260713",
+    "channel": "线下来源",
+    "owner": "冯玲",
+    "name": "李先生",
+    "phone": "18937669815",
+    "raw_type": "生日宴",
+    "card_type": "生日卡",
+    "banquet_date": "未定",
+    "package": "未选定",
+    "card_status": "已购买（已收款）",
+    "reg_time": "2026年7月13日",
+    "remarks": "无"
+  },
+  {
+    "id": "01720260713",
+    "channel": "线下来源",
+    "owner": "冯玲",
+    "name": "陈鑫",
+    "phone": "未填",
+    "raw_type": "生日宴",
+    "card_type": "生日卡",
+    "banquet_date": "未定",
+    "package": "未选定",
+    "card_status": "已购买（已收款）",
+    "reg_time": "2026年7月13日",
+    "remarks": "无"
+  },
+  {
+    "id": "01820260713",
+    "channel": "线下来源",
+    "owner": "冯玲",
+    "name": "祝超",
+    "phone": "未填",
+    "raw_type": "生日宴",
+    "card_type": "生日卡",
+    "banquet_date": "未定",
+    "package": "未选定",
+    "card_status": "已购买（已收款）",
+    "reg_time": "2026年7月13日",
+    "remarks": "无"
+  },
+  {
+    "id": "01920260713",
+    "channel": "线下来源",
+    "owner": "冯玲",
+    "name": "汪俊",
+    "phone": "未填",
+    "raw_type": "生日宴",
+    "card_type": "生日卡",
+    "banquet_date": "未定",
+    "package": "未选定",
+    "card_status": "已购买（已收款）",
+    "reg_time": "2026年7月13日",
+    "remarks": "无"
+  },
+  {
+    "id": "02020260713",
+    "channel": "线下来源",
+    "owner": "冯玲",
+    "name": "鹏帅",
+    "phone": "未填",
+    "raw_type": "生日宴",
+    "card_type": "生日卡",
+    "banquet_date": "未定",
+    "package": "未选定",
+    "card_status": "已购买（已收款）",
+    "reg_time": "2026年7月13日",
+    "remarks": "无"
+  }
+];
+
+    // Global state
+    let filteredData = [];
+    let currentType = 'all';
+    let startDate = null;
+    let endDate = null;
+    let currentRange = 'all';
+    let searchQuery = '';
+    
+    // Pagination state
+    let currentPage = 1;
+    let pageSize = 10;
+    
+    // Local storage data persistence and synchronization
+    let localAdded = [];
+    let localModified = {};
+    try {
+        localAdded = JSON.parse(localStorage.getItem('盛世礼宴_added_records') || '[]');
+        localModified = JSON.parse(localStorage.getItem('盛世礼宴_modified_records') || '{}');
+    } catch (e) {
+        console.error("Error loading local storage data", e);
+    }
+    
+    // Combine and build master database
+    let CURRENT_DATABASE = [];
+    function rebuildDatabase() {
+        let baseData = typeof BANQUET_DATA !== 'undefined' ? JSON.parse(JSON.stringify(BANQUET_DATA)) : [];
+        
+        // Apply local modifications
+        baseData = baseData.map(item => {
+            if (localModified[item.id]) {
+                return { ...item, ...localModified[item.id] };
+            }
+            return item;
+        });
+        
+        // Append local added records
+        CURRENT_DATABASE = baseData.concat(localAdded);
+    }
+    
+    rebuildDatabase();
+
+    // Targets configuration
+    const TARGET_CONFIG = {
+        sales: {
+            "李冰冰": { target: 100, label: "李冰冰 (销售)" },
+            "冯玲": { target: 100, label: "冯玲 (销售)" },
+            "郭楠": { target: 100, label: "郭楠 (销售)" },
+            "张议丹": { target: 100, label: "张议丹 (销售)" },
+            "徐俊强": { target: 100, label: "徐俊强 (销售)" }
+        },
+        dept: {
+            "统筹": { target: 10, label: "统筹部门" },
+            "灯光": { target: 10, label: "灯光部门" },
+            "前厅": { target: 50, label: "前厅部门" },
+            "后厨": { target: 50, label: "后厨部门" },
+            "行政": { target: 40, label: "行政部门" }
+        }
+    };
+    
+    // Alias mapping for names in spreadsheet
+    const OWNER_ALIAS_MAP = {
+        "冰冰": "李冰冰",
+        "李冰冰": "李冰冰",
+        "冯玲": "冯玲",
+        "郭楠": "郭楠",
+        "张议丹": "张议丹",
+        "丹丹": "张议丹",
+        "徐俊强": "徐俊强"
+    };
+
+    let activeTargetTab = 'sales';
+    const USER_PASSWORDS = {
+  "李冰冰": "8076",
+  "冯玲": "2418",
+  "郭楠": "9724",
+  "张议丹": "5679",
+  "徐俊强": "7307",
+  "统筹": "1025",
+  "灯光": "8276",
+  "前厅": "2208",
+  "后厨": "7721",
+  "行政": "9574"
+};
+    let loggedInUser = null;
+    const ADMIN_PASSWORD = "0808"; // default admin password
+
+    function handleLogin() {
+        const passwordInput = document.getElementById('login-password');
+        const password = passwordInput.value.trim();
+        
+        if (!password) {
+            alert("请输入管理密码！");
+            return;
+        }
+        
+        let identifiedUser = null;
+        
+        if (password === ADMIN_PASSWORD) {
+            identifiedUser = "系统管理员";
+        } else {
+            // Auto-recognize user by looking up their password in USER_PASSWORDS
+            const matchedUser = Object.keys(USER_PASSWORDS).find(name => USER_PASSWORDS[name] === password);
+            if (matchedUser) {
+                identifiedUser = matchedUser;
+            }
+        }
+        
+        if (identifiedUser) {
+            loggedInUser = identifiedUser;
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('user-profile-info').innerHTML = `
+                <span style="font-size: 0.85rem; color: var(--gold-light);">当前登录: <strong>${loggedInUser}</strong></span>
+                <button class="logout-btn" onclick="handleLogout()">退出登录</button>
+            `;
+            passwordInput.value = '';
+            renderTable();
+        } else {
+            alert("登录失败：密码错误，未能识别身份，请重新输入！");
+        }
+    }
+
+    function handleLogout() {
+        loggedInUser = null;
+        document.getElementById('login-overlay').style.display = 'flex';
+        document.getElementById('login-password').value = '';
+        document.getElementById('user-profile-info').innerHTML = '';
+        
+        setTimeout(() => {
+            const input = document.getElementById('login-password');
+            if (input) input.focus();
+        }, 150);
+    }
+
+    // Chart instances
+    let salesPieInstance = null;
+    let salesBarInstance = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        if (typeof BANQUET_DATA === 'undefined') {
+            console.error("BANQUET_DATA is not defined!");
+            return;
+        }
+
+        // Initialize Event Listeners
+        initFilterListeners();
+
+        // Run Initial Dashboard Update
+        updateDashboard();
+
+        // Search Input listener
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            searchQuery = e.target.value.trim().toLowerCase();
+            renderTableOnly(); // search only changes table rendering for responsiveness
+        });
+
+        // Export button listener
+        document.getElementById('export-btn').addEventListener('click', exportToCSV);
+
+
+        // Keydown Enter listener & auto-focus for login password
+        const passwordInput = document.getElementById('login-password');
+        if (passwordInput) {
+            passwordInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+            setTimeout(() => passwordInput.focus(), 150);
+        }
+    });
+
+    function parseExcelDate(dateStr) {
+        if (!dateStr) return null;
+        const match = dateStr.match(/(\d+)年(\d+)月(\d+)日/);
+        if (match) {
+            return new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
+        }
+        const d = new Date(dateStr);
+        return isNaN(d.getTime()) ? null : d;
+    }
+
+    function formatDateToISO(date) {
+        if (!date) return "";
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    function calculateDateRange(range) {
+        const now = new Date();
+        now.setHours(0,0,0,0);
+        
+        let start = null;
+        let end = null;
+        
+        switch (range) {
+            case 'today':
+                start = new Date(now);
+                end = new Date(now);
+                break;
+            case 'yesterday':
+                start = new Date(now);
+                start.setDate(now.getDate() - 1);
+                end = new Date(start);
+                break;
+            case 'this-week': {
+                const day = now.getDay();
+                const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+                start = new Date(now);
+                start.setDate(diff);
+                end = new Date(start);
+                end.setDate(start.getDate() + 6);
+                break;
+            }
+            case 'last-week': {
+                const day = now.getDay();
+                const diff = now.getDate() - day + (day === 0 ? -6 : 1) - 7;
+                start = new Date(now);
+                start.setDate(diff);
+                end = new Date(start);
+                end.setDate(start.getDate() + 6);
+                break;
+            }
+            case 'this-month':
+                start = new Date(now.getFullYear(), now.getMonth(), 1);
+                end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                break;
+            case 'last-month':
+                start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                end = new Date(now.getFullYear(), now.getMonth(), 0);
+                break;
+            case 'this-quarter': {
+                const quarter = Math.floor(now.getMonth() / 3);
+                start = new Date(now.getFullYear(), quarter * 3, 1);
+                end = new Date(now.getFullYear(), quarter * 3 + 3, 0);
+                break;
+            }
+            case 'this-year':
+                start = new Date(now.getFullYear(), 0, 1);
+                end = new Date(now.getFullYear(), 12, 0);
+                break;
+            case 'last-year':
+                start = new Date(now.getFullYear() - 1, 0, 1);
+                end = new Date(now.getFullYear() - 1, 12, 0);
+                break;
+            case 'all':
+            default:
+                start = null;
+                end = null;
+                break;
+        }
+        
+        return { start, end };
+    }
+
+    // Set filter button bindings
+    function initFilterListeners() {
+        // Card type buttons
+        const typeButtons = document.querySelectorAll('#type-filters .filter-btn');
+        typeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                typeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentType = btn.getAttribute('data-type');
+                updateDashboard();
+            });
+        });
+
+        // Custom Date Picker changes
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+
+        const onDateChange = () => {
+            startDate = startDateInput.value ? new Date(startDateInput.value) : null;
+            endDate = endDateInput.value ? new Date(endDateInput.value) : null;
+            
+            // Deactivate all quick range buttons if user manually edits date picker
+            document.querySelectorAll('#quick-date-filters .filter-btn').forEach(b => {
+                b.classList.remove('active');
+            });
+            currentRange = 'custom';
+            updateDashboard();
+        };
+
+        startDateInput.addEventListener('change', onDateChange);
+        endDateInput.addEventListener('change', onDateChange);
+
+        // Quick date range buttons
+        const rangeButtons = document.querySelectorAll('#quick-date-filters .filter-btn');
+        rangeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                rangeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentRange = btn.getAttribute('data-range');
+                
+                const range = calculateDateRange(currentRange);
+                startDate = range.start;
+                endDate = range.end;
+
+                // Sync with HTML date inputs
+                startDateInput.value = startDate ? formatDateToISO(startDate) : "";
+                endDateInput.value = endDate ? formatDateToISO(endDate) : "";
+                
+                updateDashboard();
+            });
+        });
+    }
+
+    // Full dashboard update
+    function updateDashboard() {
+        filterData();
+        renderKPIs();
+        renderCharts();
+        renderTable();
+        renderTargetProgress();
+    }
+
+    function calculateTargetCompletions() {
+        const completions = {};
+        
+        // Initialize all config keys to 0
+        Object.keys(TARGET_CONFIG.sales).forEach(k => completions[k] = 0);
+        Object.keys(TARGET_CONFIG.dept).forEach(k => completions[k] = 0);
+        
+        // Sum from raw dataset
+        CURRENT_DATABASE.forEach(d => {
+            const owner = d.owner;
+            const mappedOwner = OWNER_ALIAS_MAP[owner] || owner;
+            
+            if (mappedOwner in completions) {
+                completions[mappedOwner]++;
+            }
+        });
+        
+        return completions;
+    }
+
+    function renderTargetProgress() {
+        const completions = calculateTargetCompletions();
+        const listContainer = document.getElementById('target-progress-list');
+        if (!listContainer) return;
+        listContainer.innerHTML = '';
+        
+        const config = TARGET_CONFIG[activeTargetTab];
+        
+        Object.entries(config).forEach(([name, info]) => {
+            const targetVal = info.target;
+            const completedVal = completions[name] || 0;
+            const percentage = Math.min(100, Math.round((completedVal / targetVal) * 100));
+            
+            const itemHTML = `
+                <div class="progress-item">
+                    <div class="progress-header">
+                        <span class="progress-name">${info.label}</span>
+                        <span class="progress-numbers">${completedVal} / ${targetVal} 单</span>
+                    </div>
+                    <div class="progress-bar-track">
+                        <div class="progress-bar-fill" style="width: 0%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; font-size: 0.75rem; color: var(--gold-light); margin-top: -0.15rem;">
+                        ${percentage}%
+                    </div>
+                </div>
+            `;
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = itemHTML.trim();
+            const itemElement = tempDiv.firstChild;
+            listContainer.appendChild(itemElement);
+            
+            // Animate width after appending
+            setTimeout(() => {
+                const fill = itemElement.querySelector('.progress-bar-fill');
+                if (fill) fill.style.width = `${percentage}%`;
+            }, 100);
+        });
+    }
+
+    function switchTargetTab(tabName) {
+        activeTargetTab = tabName;
+        const buttons = document.querySelectorAll('.target-tab-btn');
+        buttons.forEach(btn => {
+            if (btn.getAttribute('onclick').includes(tabName)) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        renderTargetProgress();
+    }
+
+    // Filter master data by type and date range
+    function filterData() {
+        filteredData = CURRENT_DATABASE.filter(item => {
+            const matchType = (currentType === 'all' || item.card_type === currentType);
+            
+            let matchDate = true;
+            if (startDate || endDate) {
+                const itemDate = parseExcelDate(item.reg_time);
+                if (itemDate) {
+                    itemDate.setHours(0, 0, 0, 0);
+                    
+                    if (startDate) {
+                        const start = new Date(startDate);
+                        start.setHours(0, 0, 0, 0);
+                        if (itemDate < start) matchDate = false;
+                    }
+                    if (endDate) {
+                        const end = new Date(endDate);
+                        end.setHours(0, 0, 0, 0);
+                        if (itemDate > end) matchDate = false;
+                    }
+                } else {
+                    matchDate = false;
+                }
+            }
+            
+            return matchType && matchDate;
+        });
+    }
+
+    // Compute metrics and update cards
+    function renderKPIs() {
+        const total = filteredData.length;
+        
+        // Types counts
+        const type1Count = filteredData.filter(d => d.card_type === '生日卡').length;
+        const type2Count = filteredData.filter(d => d.card_type === '订婚卡').length;
+
+        // Card status (paid)
+        const paidCount = filteredData.filter(d => d.card_status.includes('已购买') || d.card_status.includes('已收款') || d.card_status.includes('已付')).length;
+        const paidPct = total > 0 ? Math.round((paidCount / total) * 100) : 0;
+
+        // Sales Leader (Champion)
+        const salesStats = {};
+        filteredData.forEach(d => {
+            if (d.owner) salesStats[d.owner] = (salesStats[d.owner] || 0) + 1;
+        });
+        
+        let champ = '-';
+        let champCount = 0;
+        for (const [name, count] of Object.entries(salesStats)) {
+            if (count > champCount) {
+                champCount = count;
+                champ = name;
+            }
+        }
+
+        // Latest registration date and its count
+        const dateCounts = {};
+        filteredData.forEach(d => {
+            if (d.reg_time) dateCounts[d.reg_time] = (dateCounts[d.reg_time] || 0) + 1;
+        });
+        
+        // Find latest date in sorted format
+        const sortedDates = Object.keys(dateCounts).sort();
+        const latestDate = sortedDates.length > 0 ? sortedDates[sortedDates.length - 1] : '-';
+        const latestCount = latestDate !== '-' ? dateCounts[latestDate] : 0;
+
+        // Update elements
+        document.getElementById('kpi-total').textContent = total.toString();
+        document.getElementById('kpi-total-sub').textContent = `生日卡: ${type1Count} | 订婚卡: ${type2Count}`;
+
+        document.getElementById('kpi-paid').textContent = paidCount.toString();
+        document.getElementById('kpi-paid-rate').textContent = `收款成交率 ${paidPct}%`;
+
+        document.getElementById('kpi-champion').textContent = champ;
+        document.getElementById('kpi-champion-count').textContent = champ !== '-' ? `累计完成 ${champCount} 单` : '累计完成 0 单';
+
+        document.getElementById('kpi-latest-date').textContent = latestDate;
+        document.getElementById('kpi-latest-count').textContent = latestDate !== '-' ? `当日新增登记 ${latestCount} 条` : '新增登记 0 条';
+    }
+
+    // Render sales ranking graphs
+    function renderCharts() {
+        const salesStats = {};
+        filteredData.forEach(d => {
+            if (d.owner) salesStats[d.owner] = (salesStats[d.owner] || 0) + 1;
+        });
+
+        const sortedSales = Object.entries(salesStats).sort((a, b) => b[1] - a[1]);
+        const labels = sortedSales.map(item => item[0]);
+        const counts = sortedSales.map(item => item[1]);
+
+        if (salesPieInstance) salesPieInstance.destroy();
+        if (salesBarInstance) salesBarInstance.destroy();
+
+        if (labels.length === 0) return;
+
+        // Gold-themed colors
+        const goldColors = [
+            'rgba(212, 175, 55, 0.85)',   // Rich Gold
+            'rgba(179, 143, 77, 0.85)',   // Bronze Gold
+            'rgba(243, 229, 171, 0.85)',  // Champagne Gold
+            'rgba(115, 96, 54, 0.85)',    // Muted Gold
+            'rgba(168, 162, 158, 0.7)'    // Warm Gray
+        ];
+        const goldBorders = goldColors.map(c => c.replace('0.85', '1').replace('0.7', '1'));
+
+        // Pie chart
+        const ctxPie = document.getElementById('salesPieChart').getContext('2d');
+        salesPieInstance = new Chart(ctxPie, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: counts,
+                    backgroundColor: goldColors.slice(0, labels.length),
+                    borderColor: goldBorders.slice(0, labels.length),
+                    borderWidth: 1.5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: window.innerWidth < 600 ? 'bottom' : 'right',
+                        labels: {
+                            color: '#a8a29e',
+                            font: { family: 'Outfit, Noto Sans SC', size: window.innerWidth < 600 ? 11 : 12 },
+                            padding: window.innerWidth < 600 ? 8 : 15,
+                            boxWidth: window.innerWidth < 600 ? 10 : 14
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const val = context.raw;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? Math.round((val / total) * 100) : 0;
+                                return ` ${context.label}: ${val} 单 (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+
+        // Bar chart
+        const ctxBar = document.getElementById('salesBarChart').getContext('2d');
+        salesBarInstance = new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '获客订单量',
+                    data: counts,
+                    backgroundColor: 'rgba(212, 175, 55, 0.7)',
+                    borderColor: 'rgba(212, 175, 55, 1)',
+                    borderWidth: 1.5,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { 
+                            color: '#a8a29e', 
+                            stepSize: 1,
+                            font: { family: 'Outfit, Noto Sans SC' } 
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#a8a29e', font: { family: 'Outfit, Noto Sans SC', size: 12 } }
+                    }
+                }
+            }
+        });
+    }
+
+    // Render table rows
+    function renderTable() {
+        renderTableOnly();
+    }
+
+    // Helper to render table alone for search input updates
+    function renderTableOnly() {
+        const tbody = document.getElementById('table-body');
+        const emptyState = document.getElementById('table-empty');
+
+        // Apply local search filtering
+        let tableData = filteredData.filter(item => {
+            return searchQuery === '' || 
+                   item.name.toLowerCase().includes(searchQuery) ||
+                   item.owner.toLowerCase().includes(searchQuery);
+        });
+
+        // Apply identity login filter: show only logged-in user's records
+        if (loggedInUser !== "系统管理员") {
+            tableData = tableData.filter(item => {
+                const mappedOwner = OWNER_ALIAS_MAP[item.owner] || item.owner;
+                return mappedOwner === loggedInUser;
+            });
+        }
+
+        // Calculate summary metrics for currently visible items BEFORE pagination slicing
+        const totalCount = tableData.length;
+        const birthdayCount = tableData.filter(item => item.card_type === '生日卡').length;
+        const engagementCount = tableData.filter(item => item.card_type === '订婚卡').length;
+
+        // Apply pagination slicing
+        const totalPages = Math.max(1, Math.ceil(tableData.length / pageSize));
+        if (currentPage > totalPages) currentPage = totalPages;
+        
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedData = tableData.slice(startIndex, endIndex);
+
+        // Update pagination controls UI
+        const pageInfo = document.getElementById('page-info');
+        if (pageInfo) pageInfo.textContent = `第 ${currentPage} / ${totalPages} 页`;
+        
+        const prevBtn = document.getElementById('prev-page-btn');
+        if (prevBtn) prevBtn.disabled = (currentPage === 1);
+        
+        const nextBtn = document.getElementById('next-page-btn');
+        if (nextBtn) nextBtn.disabled = (currentPage === totalPages);
+
+        if (tableData.length === 0) {
+            tbody.innerHTML = '';
+            emptyState.style.display = 'block';
+            return;
+        } else {
+            emptyState.style.display = 'none';
+        }
+
+        const rowsHTML = paginatedData.map((item, index) => {
+            const badgeClass = item.card_type === '生日卡' ? 'badge-type-1' : 'badge-type-2';
+            
+            return `
+                <tr class="main-row" onclick="toggleDetails(${index})">
+                    <td style="text-align: center;">
+                        <span class="chevron" id="chevron-${index}">
+                            <svg class="chevron-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                        </span>
+                    </td>
+                    <td data-label="客户姓名" style="font-weight: 500;">${item.name}</td>
+                    <td data-label="负责人" style="color: var(--gold-light);">${item.owner}</td>
+                    <td data-label="宴会来源">${item.channel}</td>
+                    <td data-label="卡片类型"><span class="badge ${badgeClass}">${item.card_type}</span></td>
+                    <td data-label="宴会日期">${item.banquet_date || '未定'}</td>
+                    <td data-label="登记时间">${item.reg_time}</td>
+                    <td data-label="卡片状态"><span class="badge badge-card-status">${item.card_status}</span></td>
+                </tr>
+                <tr class="detail-row" id="detail-row-${index}">
+                    <td colspan="8" class="detail-cell">
+                        <div class="detail-container" id="detail-container-${index}">
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <span class="detail-key">自动编号</span>
+                                    <span class="detail-value"><span class="badge badge-id">${item.id}</span></span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-key">联系电话</span>
+                                    <span class="detail-value" style="font-family: 'Outfit'; letter-spacing: 0.5px;">
+                                        ${item.phone || '未登记'}
+                                    </span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-key">餐标套餐</span>
+                                    <span class="detail-value">${item.package || '未约定'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-key">宴会卡购买状态</span>
+                                    <span class="detail-value">${item.card_status}</span>
+                                </div>
+                                <div class="detail-item" style="grid-column: span 2; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <span class="detail-key">备注信息</span>
+                                        <span class="detail-value">${item.remarks || '无'}</span>
+                                    </div>
+                                    <button class="unlock-btn" style="margin-left: auto; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.4); color: var(--gold); padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.75rem; cursor: pointer;" onclick="openEditModal('${item.id}', event)">
+                                        修改客资
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        const summaryRowHTML = `
+            <tr class="table-summary-row">
+                <td colspan="8">
+                    <div class="table-summary-content">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.1rem;">📊</span>
+                            <span style="color: var(--gold-light);">数据汇总 (当前显示)</span>
+                        </div>
+                        <div class="summary-stats-wrapper">
+                            <div class="summary-stat-item">总成交数据: <span style="color: var(--gold); font-size: 1.1rem; font-family: 'Outfit'; font-weight: 600;">${totalCount} 单</span></div>
+                            <div class="summary-separator"></div>
+                            <div class="summary-stat-item">生日卡: <span style="color: #d4af37; font-family: 'Outfit'; font-weight: 600;">${birthdayCount} 张</span></div>
+                            <div class="summary-separator"></div>
+                            <div class="summary-stat-item">订婚卡: <span style="color: #e5c158; font-family: 'Outfit'; font-weight: 600;">${engagementCount} 张</span></div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+
+        tbody.innerHTML = rowsHTML + summaryRowHTML;
+    }
+
+    function changePageSize(val) {
+        pageSize = parseInt(val);
+        currentPage = 1;
+        renderTableOnly();
+    }
+
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTableOnly();
+        }
+    }
+
+    function nextPage() {
+        let tableData = filteredData;
+        if (loggedInUser !== "系统管理员") {
+            tableData = tableData.filter(item => {
+                const mappedOwner = OWNER_ALIAS_MAP[item.owner] || item.owner;
+                return mappedOwner === loggedInUser;
+            });
+        }
+        tableData = tableData.filter(item => {
+            return searchQuery === '' || 
+                   item.name.toLowerCase().includes(searchQuery) ||
+                   item.owner.toLowerCase().includes(searchQuery);
+        });
+
+        const totalPages = Math.max(1, Math.ceil(tableData.length / pageSize));
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTableOnly();
+        }
+    }
+
+    let editingId = null;
+
+    function openAddModal() {
+        editingId = null;
+        document.getElementById('modal-title').textContent = "快捷录入客资";
+        
+        // Reset form fields
+        document.getElementById('modal-name').value = '';
+        document.getElementById('modal-phone').value = '';
+        
+        const ownerSelect = document.getElementById('modal-owner');
+        if (loggedInUser && loggedInUser !== "系统管理员") {
+            ownerSelect.value = loggedInUser;
+        } else {
+            ownerSelect.value = "李冰冰";
+        }
+        
+        document.getElementById('modal-channel').value = '';
+        document.getElementById('modal-card-type').value = "生日卡";
+        document.getElementById('modal-banquet-date').value = '';
+        document.getElementById('modal-package').value = '';
+        document.getElementById('modal-card-status').value = "未收款";
+        document.getElementById('modal-remarks').value = '';
+        
+        document.getElementById('add-edit-modal').style.display = 'flex';
+    }
+
+    function openEditModal(id, event) {
+        if (event) event.stopPropagation();
+        
+        editingId = id;
+        document.getElementById('modal-title').textContent = "修改客资明细";
+        
+        const record = CURRENT_DATABASE.find(item => item.id === id);
+        if (!record) return;
+        
+        document.getElementById('modal-name').value = record.name || '';
+        document.getElementById('modal-phone').value = record.phone || '';
+        
+        const ownerSelect = document.getElementById('modal-owner');
+        const mappedOwner = OWNER_ALIAS_MAP[record.owner] || record.owner;
+        ownerSelect.value = mappedOwner;
+        
+        document.getElementById('modal-channel').value = record.channel || '';
+        document.getElementById('modal-card-type').value = record.card_type || '生日卡';
+        
+        let formattedDate = "";
+        if (record.banquet_date && record.banquet_date !== "未定") {
+            if (/^\d{4}-\d{2}-\d{2}$/.test(record.banquet_date)) {
+                formattedDate = record.banquet_date;
+            } else {
+                const dateObj = new Date(record.banquet_date);
+                if (!isNaN(dateObj.getTime())) {
+                    formattedDate = dateObj.toISOString().split('T')[0];
+                }
+            }
+        }
+        document.getElementById('modal-banquet-date').value = formattedDate;
+        
+        document.getElementById('modal-package').value = record.package || '';
+        document.getElementById('modal-card-status').value = record.card_status || '未收款';
+        document.getElementById('modal-remarks').value = record.remarks || '';
+        
+        document.getElementById('add-edit-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('add-edit-modal').style.display = 'none';
+        editingId = null;
+    }
+
+    function saveRecord() {
+        const name = document.getElementById('modal-name').value.trim();
+        const phone = document.getElementById('modal-phone').value.trim();
+        const owner = document.getElementById('modal-owner').value;
+        const channel = document.getElementById('modal-channel').value.trim();
+        const card_type = document.getElementById('modal-card-type').value;
+        const banquet_date = document.getElementById('modal-banquet-date').value;
+        const package_val = document.getElementById('modal-package').value.trim();
+        const card_status = document.getElementById('modal-card-status').value;
+        const remarks = document.getElementById('modal-remarks').value.trim();
+        
+        if (!name) {
+            alert("请输入客户姓名！");
+            return;
+        }
+        if (!phone) {
+            alert("请输入联系电话！");
+            return;
+        }
+        
+        let finalBanquetDate = banquet_date || "未定";
+        const updatedFields = {
+            name: name,
+            phone: phone,
+            owner: owner,
+            channel: channel || "手动录入",
+            card_type: card_type,
+            banquet_date: finalBanquetDate,
+            package: package_val || "未约定",
+            card_status: card_status,
+            remarks: remarks || "无"
+        };
+        
+        if (editingId === null) {
+            const newId = "CUSTOM_" + Date.now();
+            const today = new Date();
+            const reg_time = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+            
+            const newRecord = {
+                id: newId,
+                ...updatedFields,
+                reg_time: reg_time
+            };
+            
+            localAdded.push(newRecord);
+            localStorage.setItem('盛世礼宴_added_records', JSON.stringify(localAdded));
+            alert("客资添加成功！");
+        } else {
+            if (String(editingId).startsWith("CUSTOM_")) {
+                localAdded = localAdded.map(item => {
+                    if (item.id === editingId) {
+                        return { ...item, ...updatedFields };
+                    }
+                    return item;
+                });
+                localStorage.setItem('盛世礼宴_added_records', JSON.stringify(localAdded));
+            } else {
+                localModified[editingId] = updatedFields;
+                localStorage.setItem('盛世礼宴_modified_records', JSON.stringify(localModified));
+            }
+            alert("客资修改成功！");
+        }
+        
+        rebuildDatabase();
+        closeModal();
+        updateDashboard();
+    }
+
+    // Toggle details panels
+    function toggleDetails(index) {
+        const mainRow = document.querySelectorAll('.main-row')[index];
+        const detailRow = document.getElementById(`detail-row-${index}`);
+        const detailContainer = document.getElementById(`detail-container-${index}`);
+        
+        const isShown = detailRow.classList.contains('show');
+
+        // Close all other details first for accordion style (optional, let's allow multiple open for comparison, but toggle this specific one)
+        if (isShown) {
+            mainRow.classList.remove('expanded');
+            detailContainer.style.maxHeight = '0px';
+            detailContainer.style.opacity = '0';
+            setTimeout(() => {
+                detailRow.classList.remove('show');
+            }, 300); // match css transition
+        } else {
+            mainRow.classList.add('expanded');
+            detailRow.classList.add('show');
+            
+            // To animate height smoothly, we measure clientHeight of grid
+            const grid = detailContainer.querySelector('.detail-grid');
+            const height = grid.offsetHeight + 40; // add padding
+            
+            // force reflow
+            detailContainer.offsetHeight;
+            
+            detailContainer.style.maxHeight = height + 'px';
+            detailContainer.style.opacity = '1';
+        }
+    }
+
+    // Export dataset to CSV
+    function exportToCSV() {
+        const tableData = filteredData.filter(item => {
+            return searchQuery === '' || 
+                   item.name.toLowerCase().includes(searchQuery) ||
+                   item.owner.toLowerCase().includes(searchQuery);
+        });
+
+        if (tableData.length === 0) {
+            alert('当前没有可导出的数据');
+            return;
+        }
+
+        let csvContent = "\uFEFF"; // UTF-8 BOM
+        csvContent += "自动编号,获客渠道,负责人,客户姓名,联系电话,原宴会类型,卡片分类,宴会日期,餐标套餐,卡片购买状态,登记时间,备注\n";
+
+        tableData.forEach(item => {
+            const row = [
+                item.id,
+                item.channel,
+                item.owner,
+                item.name,
+                item.phone,
+                item.raw_type,
+                item.card_type,
+                item.banquet_date,
+                item.package,
+                item.card_status,
+                item.reg_time,
+                item.remarks
+            ].map(val => `"${val.replace(/"/g, '""')}"`).join(",");
+            csvContent += row + "\n";
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        
+        const t = currentType === 'all' ? '全部卡型' : currentType;
+        const d = currentDate === 'all' ? '全部日期' : currentDate;
+
+        link.setAttribute("href", url);
+        link.setAttribute("download", `盛世礼宴小宴会客资报表_${t}_${d}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="add-edit-modal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3 id="modal-title">快捷录入客资</h3>
+            <button class="modal-close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="modal-name" style="font-weight: 500;">客户姓名 <span style="color: var(--gold);">*</span></label>
+                <input type="text" id="modal-name" class="search-input" style="width: 100%;" placeholder="请输入客户姓名">
+            </div>
+            <div class="form-group">
+                <label for="modal-phone" style="font-weight: 500;">联系电话 <span style="color: var(--gold);">*</span></label>
+                <input type="text" id="modal-phone" class="search-input" style="width: 100%;" placeholder="请输入联系电话">
+            </div>
+            <div class="form-group">
+                <label for="modal-owner" style="font-weight: 500;">负责人 <span style="color: var(--gold);">*</span></label>
+                <select id="modal-owner" class="select-input" style="width: 100%;">
+                    <option value="李冰冰">李冰冰 (销售)</option>
+                    <option value="冯玲">冯玲 (销售)</option>
+                    <option value="郭楠">郭楠 (销售)</option>
+                    <option value="张议丹">张议丹 (销售)</option>
+                    <option value="徐俊强">徐俊强 (销售)</option>
+                    <option value="统筹">统筹部门</option>
+                    <option value="灯光">灯光部门</option>
+                    <option value="前厅">前厅部门</option>
+                    <option value="后厨">后厨部门</option>
+                    <option value="行政">行政部门</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modal-channel" style="font-weight: 500;">宴会来源</label>
+                <input type="text" id="modal-channel" class="search-input" style="width: 100%;" placeholder="例如：大门进客、微信咨询">
+            </div>
+            <div class="form-group">
+                <label for="modal-card-type" style="font-weight: 500;">卡片类型</label>
+                <select id="modal-card-type" class="select-input" style="width: 100%;">
+                    <option value="生日卡">生日卡</option>
+                    <option value="订婚卡">订婚卡</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modal-banquet-date" style="font-weight: 500;">宴会日期</label>
+                <input type="date" id="modal-banquet-date" class="date-input" style="width: 100%;">
+            </div>
+            <div class="form-group">
+                <label for="modal-package" style="font-weight: 500;">餐标套餐</label>
+                <input type="text" id="modal-package" class="search-input" style="width: 100%;" placeholder="例如：999元/桌">
+            </div>
+            <div class="form-group">
+                <label for="modal-card-status" style="font-weight: 500;">卡片状态</label>
+                <select id="modal-card-status" class="select-input" style="width: 100%;">
+                    <option value="已收款">已收款</option>
+                    <option value="未收款">未收款</option>
+                    <option value="已交定金">已交定金</option>
+                    <option value="已结算">已结算</option>
+                </select>
+            </div>
+            <div class="form-group full-width">
+                <label for="modal-remarks" style="font-weight: 500;">备注信息</label>
+                <textarea id="modal-remarks" class="search-input" style="width: 100%; height: 70px; resize: none; padding: 0.5rem;" placeholder="请输入备注信息"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal()">取消</button>
+            <button class="login-btn" style="margin-top: 0; padding: 0.5rem 1.5rem;" onclick="saveRecord()">保存</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
