@@ -2145,10 +2145,17 @@
             currentOwner = 'all';
         }
 
-        salesFilter.innerHTML = [
-            '<option value="all">全部销售人员</option>',
-            ...owners.map(owner => `<option value="${escapeHtml(owner)}">${escapeHtml(owner)}</option>`)
-        ].join('');
+        salesFilter.replaceChildren();
+        const allOption = document.createElement('option');
+        allOption.value = 'all';
+        allOption.textContent = '全部销售人员';
+        salesFilter.appendChild(allOption);
+        owners.forEach(owner => {
+            const option = document.createElement('option');
+            option.value = owner;
+            option.textContent = owner;
+            salesFilter.appendChild(option);
+        });
         salesFilter.value = currentOwner;
     }
 
