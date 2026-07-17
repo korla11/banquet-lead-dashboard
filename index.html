@@ -208,6 +208,26 @@
             box-shadow: 0 15px 45px 0 rgba(212, 175, 55, 0.1);
         }
 
+        .kpi-action-card {
+            width: 100%;
+            min-width: 0;
+            color: inherit;
+            font: inherit;
+            text-align: left;
+            text-decoration: none;
+            cursor: pointer;
+            appearance: none;
+        }
+
+        .kpi-action-card .kpi-value {
+            font-size: 1.65rem;
+        }
+
+        .kpi-action-card[aria-expanded="true"] {
+            border-color: rgba(212, 175, 55, 0.55);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
         .kpi-info h3 {
             font-size: 0.875rem;
             color: var(--text-secondary);
@@ -1354,61 +1374,49 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="7" y1="16" x2="13" y2="16"/></svg>
             </div>
         </div>
-        <!-- KPI 2 -->
-        <div class="kpi-card">
+        <!-- Task list entry -->
+        <button class="kpi-card kpi-action-card" id="task-list-toggle" type="button" aria-expanded="false" aria-controls="task-list-content" onclick="toggleTaskList()">
             <div class="kpi-info">
-                <h3>已收款卡片</h3>
-                <div class="kpi-value" id="kpi-paid">-</div>
-                <div class="kpi-subtext" id="kpi-paid-rate">收款率 100%</div>
-            </div>
-            <div class="kpi-icon-box" style="color: var(--success); border-color: rgba(16, 185, 129, 0.2); background: rgba(16, 185, 129, 0.08);">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="8 12 11 15 16 9"/></svg>
-            </div>
-        </div>
-        <!-- KPI 3 -->
-        <div class="kpi-card">
-            <div class="kpi-info">
-                <h3>销售冠军</h3>
-                <div class="kpi-value" id="kpi-champion" style="font-size: 1.6rem; height: 50px; display: flex; align-items: center;">-</div>
-                <div class="kpi-subtext" id="kpi-champion-count">完成客资 --</div>
+                <h3>快捷入口</h3>
+                <div class="kpi-value">任务列表</div>
+                <div class="kpi-subtext">查看销售与部门任务进度</div>
             </div>
             <div class="kpi-icon-box">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
             </div>
-        </div>
-        <!-- KPI 4 -->
-        <div class="kpi-card">
+        </button>
+        <!-- Dashboard entry -->
+        <a class="kpi-card kpi-action-card" href="dashboard.html">
             <div class="kpi-info">
-                <h3>最近登记日期</h3>
-                <div class="kpi-value" id="kpi-latest-date" style="font-size: 1.45rem; height: 50px; display: flex; align-items: center;">-</div>
-                <div class="kpi-subtext" id="kpi-latest-count">本日新增 --</div>
+                <h3>数据图解</h3>
+                <div class="kpi-value">仪表盘</div>
+                <div class="kpi-subtext">查看扇形图与柱状图</div>
+            </div>
+            <div class="kpi-icon-box">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+        </a>
+        <!-- Schedule entry -->
+        <a class="kpi-card kpi-action-card" href="schedule.html">
+            <div class="kpi-info">
+                <h3>宴会档期</h3>
+                <div class="kpi-value">档期表</div>
+                <div class="kpi-subtext">查看已安排与待定档期</div>
             </div>
             <div class="kpi-icon-box">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Targets & Progress -->
-    <div class="target-section">
-        <div class="overview-actions">
-            <button class="task-list-toggle" id="task-list-toggle" type="button" aria-expanded="false" aria-controls="task-list-content" onclick="toggleTaskList()">
-                <span>任务列表</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <a class="task-list-toggle dashboard-nav-button" href="dashboard.html">
-                <span>仪表盘</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </a>
+    <div class="target-section" id="task-list-content" hidden>
+        <div class="target-tabs">
+            <button class="target-tab-btn active" onclick="switchTargetTab('sales')">销售个人任务进度</button>
+            <button class="target-tab-btn" onclick="switchTargetTab('dept')">部门任务进度</button>
         </div>
-        <div class="task-list-content" id="task-list-content" hidden>
-            <div class="target-tabs">
-                <button class="target-tab-btn active" onclick="switchTargetTab('sales')">销售个人任务进度</button>
-                <button class="target-tab-btn" onclick="switchTargetTab('dept')">部门任务进度</button>
-            </div>
-            <div class="progress-list" id="target-progress-list">
-                <!-- Progress items dynamically loaded here -->
-            </div>
+        <div class="progress-list" id="target-progress-list">
+            <!-- Progress items dynamically loaded here -->
         </div>
     </div>
 
@@ -2251,6 +2259,10 @@
         const willOpen = content.hidden;
         content.hidden = !willOpen;
         button.setAttribute('aria-expanded', String(willOpen));
+        localStorage.setItem('banquet_task_list_open', String(willOpen));
+        if (willOpen) {
+            requestAnimationFrame(() => content.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+        }
     }
 
     function switchTargetTab(tabName) {
@@ -2338,15 +2350,6 @@
         // Update elements
         document.getElementById('kpi-total').textContent = total.toString();
         document.getElementById('kpi-total-sub').textContent = `生日卡: ${type1Count} | 订婚卡: ${type2Count}`;
-
-        document.getElementById('kpi-paid').textContent = paidCount.toString();
-        document.getElementById('kpi-paid-rate').textContent = `收款成交率 ${paidPct}%`;
-
-        document.getElementById('kpi-champion').textContent = champ;
-        document.getElementById('kpi-champion-count').textContent = champ !== '-' ? `累计完成 ${champCount} 单` : '累计完成 0 单';
-
-        document.getElementById('kpi-latest-date').textContent = latestDate;
-        document.getElementById('kpi-latest-count').textContent = latestDate !== '-' ? `当日新增登记 ${latestCount} 条` : '新增登记 0 条';
     }
 
     // Render sales ranking graphs
