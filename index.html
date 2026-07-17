@@ -1381,7 +1381,7 @@
             </div>
         </div>
         <!-- Task list entry -->
-        <button class="kpi-card kpi-action-card" id="task-list-toggle" type="button" aria-expanded="false" aria-controls="task-list-content" onclick="toggleTaskList()">
+        <a class="kpi-card kpi-action-card" href="tasks.html">
             <div class="kpi-info">
                 <h3>快捷入口</h3>
                 <div class="kpi-value">任务列表</div>
@@ -1390,7 +1390,7 @@
             <div class="kpi-icon-box">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
             </div>
-        </button>
+        </a>
         <!-- Dashboard entry -->
         <a class="kpi-card kpi-action-card" href="dashboard.html">
             <div class="kpi-info">
@@ -1413,17 +1413,6 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </div>
         </a>
-    </div>
-
-    <!-- Targets & Progress -->
-    <div class="target-section" id="task-list-content" hidden>
-        <div class="target-tabs">
-            <button class="target-tab-btn active" onclick="switchTargetTab('sales')">销售个人任务进度</button>
-            <button class="target-tab-btn" onclick="switchTargetTab('dept')">部门任务进度</button>
-        </div>
-        <div class="progress-list" id="target-progress-list">
-            <!-- Progress items dynamically loaded here -->
-        </div>
     </div>
 
     <!-- Filters -->
@@ -1985,10 +1974,6 @@
             applyLoggedInUser(savedUser);
         }
 
-        const taskListOpen = localStorage.getItem('banquet_task_list_open') === 'true';
-        document.getElementById('task-list-content').hidden = !taskListOpen;
-        document.getElementById('task-list-toggle').setAttribute('aria-expanded', String(taskListOpen));
-
         // Initialize Event Listeners
         initFilterListeners();
 
@@ -2199,7 +2184,6 @@
         filterData();
         renderKPIs();
         renderTable();
-        renderTargetProgress();
     }
 
     function calculateTargetCompletions() {
