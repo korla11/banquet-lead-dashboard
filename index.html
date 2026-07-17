@@ -1886,6 +1886,13 @@
     let loggedInUser = null;
     const ADMIN_PASSWORD = "0808"; // default admin password
 
+    function setAdminLeadActionsVisible(visible) {
+        ['admin-add-btn', 'admin-upload-btn', 'export-btn'].forEach(id => {
+            const button = document.getElementById(id);
+            if (button) button.style.display = visible ? 'inline-flex' : 'none';
+        });
+    }
+
     function handleLogin() {
         const passwordInput = document.getElementById('login-password');
         const password = passwordInput.value.trim();
