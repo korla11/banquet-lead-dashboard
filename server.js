@@ -10,11 +10,25 @@ const PORT = process.env.PORT || 3000;
 const ADMIN_PASSWORD = "0808";
 
 // Enable CORS and JSON parsing
+app.disable('etag');
+app.use((req, res, next) => {
+    res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+    });
+    next();
+});
 app.use(cors());
 app.use(express.json());
 
 // Serve static dashboard files from the current folder
-app.use(express.static(__dirname));
+app.use(express.static(__dirname, {
+    etag: false,
+    lastModified: false,
+    maxAge: 0
+}));
 
 const DB_FILE = path.join(__dirname, 'db.json');
 const HTML_FILE = path.join(__dirname, 'index.html');
