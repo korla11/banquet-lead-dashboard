@@ -25,6 +25,7 @@ app.use(express.json());
 
 // Serve static dashboard files from the current folder
 app.use(express.static(__dirname, {
+    cacheControl: false,
     etag: false,
     lastModified: false,
     maxAge: 0
