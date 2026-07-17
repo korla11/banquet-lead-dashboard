@@ -1889,6 +1889,22 @@
     };
     let loggedInUser = null;
     const ADMIN_PASSWORD = "0808"; // default admin password
+    const VIEW_ONLY_USER = "全部数据（只读）";
+    const LOGIN_SESSION_KEY = "banquet_logged_in_user";
+
+    function isAllDataViewer() {
+        return loggedInUser === "系统管理员" || loggedInUser === VIEW_ONLY_USER;
+    }
+
+    function applyLoggedInUser(user) {
+        loggedInUser = user;
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('user-profile-info').innerHTML = `
+            <span style="font-size: 0.85rem; color: var(--gold-light);">当前登录: <strong>${loggedInUser}</strong></span>
+            <button class="logout-btn" onclick="handleLogout()">退出登录</button>
+        `;
+        setAdminLeadActionsVisible(loggedInUser === "系统管理员");
+    }
 
     function setAdminLeadActionsVisible(visible) {
         ['admin-add-btn', 'admin-upload-btn', 'export-btn'].forEach(id => {
@@ -1919,14 +1935,8 @@
         }
         
         if (identifiedUser) {
-            loggedInUser = identifiedUser;
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('user-profile-info').innerHTML = `
-                <span style="font-size: 0.85rem; color: var(--gold-light);">当前登录: <strong>${loggedInUser}</strong></span>
-                <button class="logout-btn" onclick="handleLogout()">退出登录</button>
-            `;
-            
-            setAdminLeadActionsVisible(loggedInUser === "系统管理员");
+            sessionStorage.setItem(LOGIN_SESSION_KEY, identifiedUser);
+            applyLoggedInUser(identifiedUser);
             
             passwordInput.value = '';
             renderTable();
@@ -1937,6 +1947,7 @@
 
     function handleLogout() {
         loggedInUser = null;
+        sessionStorage.removeItem(LOGIN_SESSION_KEY);
         document.getElementById('login-overlay').style.display = 'flex';
         document.getElementById('login-password').value = '';
         document.getElementById('user-profile-info').innerHTML = '';
@@ -1954,6 +1965,12 @@
     let salesBarInstance = null;
 
     document.addEventListener("DOMContentLoaded", async () => {
+        const savedUser = sessionStorage.getItem(LOGIN_SESSION_KEY);
+        const allowedUsers = ["系统管理员", VIEW_ONLY_USER, ...Object.keys(USER_PASSWORDS)];
+        if (savedUser && allowedUsers.includes(savedUser)) {
+            applyLoggedInUser(savedUser);
+        }
+
         // Initialize Event Listeners
         initFilterListeners();
 
@@ -1978,7 +1995,9 @@
                     handleLogin();
                 }
             });
-            setTimeout(() => passwordInput.focus(), 150);
+            if (!loggedInUser) {
+                setTimeout(() => passwordInput.focus(), 150);
+            }
         }
     });
 
@@ -2569,7 +2588,7 @@
         });
 
         // Apply identity login filter: show only logged-in user's records
-        if (loggedInUser !== "系统管理员") {
+        if (!isAllDataViewer()) {
             tableData = tableData.filter(item => {
                 const mappedOwner = OWNER_ALIAS_MAP[item.owner] || item.owner;
                 return mappedOwner === loggedInUser;
@@ -2610,8 +2629,12 @@
         const rowsHTML = paginatedData.map((item, index) => {
             const badgeClass = item.card_type === '生日卡' ? 'badge-type-1' : 'badge-type-2';
             
+            const rowAction = loggedInUser === VIEW_ONLY_USER
+                ? 'style="cursor: default;"'
+                : `onclick="openEditModal('${item.id}', event)" style="cursor: pointer;"`;
+
             return `
-                <tr class="main-row" onclick="openEditModal('${item.id}', event)" style="cursor: pointer;">
+                <tr class="main-row" ${rowAction}>
                     <td data-label="客户姓名" style="font-weight: 500;">${item.name}</td>
                     <td data-label="负责人" style="color: var(--gold-light);">${item.owner}</td>
                     <td data-label="宴会来源">${item.channel}</td>
@@ -2661,7 +2684,7 @@
 
     function nextPage() {
         let tableData = filteredData;
-        if (loggedInUser !== "系统管理员") {
+        if (!isAllDataViewer()) {
             tableData = tableData.filter(item => {
                 const mappedOwner = OWNER_ALIAS_MAP[item.owner] || item.owner;
                 return mappedOwner === loggedInUser;
