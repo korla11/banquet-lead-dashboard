@@ -423,9 +423,9 @@
             border-color: rgba(239, 68, 68, 0.32);
         }
 
-        html[data-theme="day"] .calendar-day,
+        html[data-theme="day"] .calendar-day:not(.selected):not(.today),
         html[data-theme="day"] .record,
-        html[data-theme="day"] .filter-button {
+        html[data-theme="day"] .filter-button:not(.active) {
             border-color: #e7e5e4;
             background: rgba(250, 250, 249, 0.92);
         }
