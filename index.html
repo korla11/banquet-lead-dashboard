@@ -1979,6 +1979,10 @@
             applyLoggedInUser(savedUser);
         }
 
+        const taskListOpen = localStorage.getItem('banquet_task_list_open') === 'true';
+        document.getElementById('task-list-content').hidden = !taskListOpen;
+        document.getElementById('task-list-toggle').setAttribute('aria-expanded', String(taskListOpen));
+
         // Initialize Event Listeners
         initFilterListeners();
 
