@@ -286,6 +286,11 @@
         }
     }
 
+    const IS_DAY_THEME = document.documentElement.dataset.theme === 'day';
+    const CHART_TEXT = IS_DAY_THEME ? '#292524' : '#d6d3d1';
+    const CHART_MUTED = IS_DAY_THEME ? '#78716c' : '#a8a29e';
+    const CHART_GRID = IS_DAY_THEME ? 'rgba(68, 64, 60, 0.12)' : 'rgba(255, 255, 255, 0.07)';
+    const CHART_VALUE = IS_DAY_THEME ? '#8a6508' : '#f6d98b';
     const COLORS = ['#f2c879', '#d77de4', '#9fc5d1', '#91b875', '#e89374', '#7ca9e8', '#b9a58f', '#d986a5'];
     const OWNER_ALIAS_MAP = {
         '冰冰': '李冰冰',
@@ -345,7 +350,7 @@
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: '#d6d3d1',
+                            color: CHART_TEXT,
                             usePointStyle: true,
                             padding: 16,
                             font: { family: 'Noto Sans SC', size: 12 }
@@ -357,7 +362,7 @@
                         }
                     },
                     datalabels: {
-                        color: '#fafaf9',
+                        color: IS_DAY_THEME ? '#292524' : '#fafaf9',
                         textStrokeColor: 'rgba(0, 0, 0, 0.65)',
                         textStrokeWidth: 3,
                         font: { family: 'Noto Sans SC', weight: '600', size: 12 },
@@ -396,7 +401,7 @@
                     datalabels: {
                         anchor: 'end',
                         align: 'end',
-                        color: '#f6d98b',
+                        color: CHART_VALUE,
                         font: { family: 'Outfit', weight: '700', size: 14 },
                         formatter: value => `${value}`
                     }
@@ -405,16 +410,16 @@
                     x: {
                         grid: { display: false },
                         ticks: {
-                            color: '#d6d3d1',
+                            color: CHART_TEXT,
                             font: { family: 'Noto Sans SC', size: 12 }
                         }
                     },
                     y: {
                         beginAtZero: true,
                         grace: '15%',
-                        grid: { color: 'rgba(255, 255, 255, 0.07)' },
+                        grid: { color: CHART_GRID },
                         ticks: {
-                            color: '#a8a29e',
+                            color: CHART_MUTED,
                             precision: 0,
                             font: { family: 'Outfit', size: 11 }
                         }
