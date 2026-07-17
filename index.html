@@ -1458,7 +1458,7 @@
             </div>
             <div class="table-actions">
                 <input type="text" id="search-input" class="search-input" placeholder="搜索姓名或销售人员...">
-                <button onclick="openAddModal()" class="export-btn" style="background: linear-gradient(135deg, var(--gold) 0%, #b38f4d 100%); color: #000; border: none; font-weight: 600; padding: 0.5rem 1rem;">
+                <button id="admin-add-btn" onclick="openAddModal()" class="export-btn" style="display: none; background: linear-gradient(135deg, var(--gold) 0%, #b38f4d 100%); color: #000; border: none; font-weight: 600; padding: 0.5rem 1rem;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     快捷录入客资
                 </button>
@@ -1467,7 +1467,7 @@
                     上传 Excel
                 </button>
                 <input type="file" id="excel-file-input" style="display: none;" accept=".xlsx" onchange="handleExcelUpload(event)">
-                <button id="export-btn" class="export-btn">
+                <button id="export-btn" class="export-btn" style="display: none;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     导出CSV
                 </button>
@@ -1785,10 +1785,20 @@
 
     // Excel upload handler functions
     function triggerExcelUpload() {
+        if (loggedInUser !== "系统管理员") {
+            alert("仅系统管理员可以上传客资数据！");
+            return;
+        }
         document.getElementById('excel-file-input').click();
     }
 
     async function handleExcelUpload(event) {
+        if (loggedInUser !== "系统管理员") {
+            event.target.value = '';
+            alert("仅系统管理员可以上传客资数据！");
+            return;
+        }
+
         const file = event.target.files[0];
         if (!file) return;
         
@@ -1905,12 +1915,7 @@
                 <button class="logout-btn" onclick="handleLogout()">退出登录</button>
             `;
             
-            // Show Excel upload button if logged in as Admin
-            if (loggedInUser === "系统管理员") {
-                document.getElementById('admin-upload-btn').style.display = 'inline-flex';
-            } else {
-                document.getElementById('admin-upload-btn').style.display = 'none';
-            }
+            setAdminLeadActionsVisible(loggedInUser === "系统管理员");
             
             passwordInput.value = '';
             renderTable();
@@ -1925,8 +1930,7 @@
         document.getElementById('login-password').value = '';
         document.getElementById('user-profile-info').innerHTML = '';
         
-        // Hide Excel upload button
-        document.getElementById('admin-upload-btn').style.display = 'none';
+        setAdminLeadActionsVisible(false);
         
         setTimeout(() => {
             const input = document.getElementById('login-password');
@@ -2631,6 +2635,11 @@
     let editingId = null;
 
     function openAddModal() {
+        if (loggedInUser !== "系统管理员") {
+            alert("仅系统管理员可以快捷录入客资！");
+            return;
+        }
+
         editingId = null;
         document.getElementById('modal-title').textContent = "快捷录入客资";
         document.getElementById('delete-record-btn').style.display = 'none';
@@ -2823,6 +2832,11 @@
 
     // Export dataset to CSV
     function exportToCSV() {
+        if (loggedInUser !== "系统管理员") {
+            alert("仅系统管理员可以导出客资数据！");
+            return;
+        }
+
         const tableData = filteredData.filter(item => {
             return searchQuery === '' || 
                    item.name.toLowerCase().includes(searchQuery) ||
