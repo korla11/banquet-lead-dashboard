@@ -7,6 +7,7 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const ADMIN_PASSWORD = "0808";
 
 // Enable CORS and JSON parsing
 app.use(cors());
@@ -232,6 +233,35 @@ app.put('/api/data/:id', (req, res) => {
             db.modified_records[id] = { ...db.modified_records[id], ...edits };
         }
         
+        saveDatabase(db);
+        res.json({ success: true, id: id });
+    } catch (e) {
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// API: Delete record (admin only)
+app.delete('/api/data/:id', (req, res) => {
+    if (req.get('x-admin-password') !== ADMIN_PASSWORD) {
+        return res.status(403).json({ success: false, error: "仅系统管理员可以删除客资" });
+    }
+
+    try {
+        const { id } = req.params;
+        const db = loadDatabase();
+        const rawLength = db.raw_records.length;
+        const customLength = db.custom_records.length;
+
+        db.raw_records = db.raw_records.filter(rec => String(rec.id) !== String(id));
+        db.custom_records = db.custom_records.filter(rec => String(rec.id) !== String(id));
+        if (db.modified_records && db.modified_records[id]) {
+            delete db.modified_records[id];
+        }
+
+        if (db.raw_records.length === rawLength && db.custom_records.length === customLength) {
+            return res.status(404).json({ success: false, error: "未找到需要删除的客资" });
+        }
+
         saveDatabase(db);
         res.json({ success: true, id: id });
     } catch (e) {

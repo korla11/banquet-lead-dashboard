@@ -2579,6 +2579,7 @@
     function openAddModal() {
         editingId = null;
         document.getElementById('modal-title').textContent = "快捷录入客资";
+        document.getElementById('delete-record-btn').style.display = 'none';
         
         // Hide metadata fields in add mode
         document.getElementById('modal-id-container').style.display = 'none';
@@ -2610,6 +2611,7 @@
         
         editingId = id;
         document.getElementById('modal-title').textContent = "客资详细档案";
+        document.getElementById('delete-record-btn').style.display = loggedInUser === "系统管理员" ? 'inline-flex' : 'none';
         
         // Show metadata fields in edit mode
         document.getElementById('modal-id-container').style.display = 'block';
@@ -2719,6 +2721,47 @@
         } catch (e) {
             console.error("Error saving record to server", e);
             alert("网络错误，保存失败！");
+        }
+    }
+
+    async function deleteRecord() {
+        if (loggedInUser !== "系统管理员" || !editingId) {
+            alert("仅系统管理员可以删除客资！");
+            return;
+        }
+
+        const record = CURRENT_DATABASE.find(item => item.id === editingId);
+        if (!record) {
+            alert("未找到需要删除的客资！");
+            return;
+        }
+
+        if (!confirm(`确定删除客户“${record.name || '未命名'}”的客资吗？删除后无法恢复。`)) {
+            return;
+        }
+
+        const button = document.getElementById('delete-record-btn');
+        button.disabled = true;
+        button.textContent = "删除中...";
+        try {
+            const res = await fetch(`/api/data/${encodeURIComponent(editingId)}`, {
+                method: 'DELETE',
+                headers: { 'X-Admin-Password': ADMIN_PASSWORD }
+            });
+            const result = await res.json();
+            if (!res.ok || !result.success) {
+                throw new Error(result.error || "删除失败");
+            }
+            closeModal();
+            await loadDataFromServer();
+            updateDashboard();
+            alert("客资已删除！");
+        } catch (e) {
+            console.error("Error deleting record", e);
+            alert("删除失败：" + e.message);
+        } finally {
+            button.disabled = false;
+            button.textContent = "删除客资";
         }
     }
 
@@ -2847,6 +2890,7 @@
             </div>
         </div>
         <div class="modal-footer">
+            <button id="delete-record-btn" class="btn-secondary" style="display: none; margin-right: auto; border-color: rgba(239, 68, 68, 0.55); color: #f87171;" onclick="deleteRecord()">删除客资</button>
             <button class="btn-secondary" onclick="closeModal()">取消</button>
             <button class="login-btn" style="margin-top: 0; padding: 0.5rem 1.5rem;" onclick="saveRecord()">保存</button>
         </div>
