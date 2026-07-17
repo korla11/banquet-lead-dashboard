@@ -1426,6 +1426,12 @@
             </div>
         </div>
         <div class="filter-group">
+            <label class="filter-label" for="sales-filter">销售人员</label>
+            <select id="sales-filter" class="select-input">
+                <option value="all">全部销售人员</option>
+            </select>
+        </div>
+        <div class="filter-group">
             <span class="filter-label">自定义日期</span>
             <div class="date-range-wrapper">
                 <input type="date" id="start-date" class="date-input">
@@ -1726,6 +1732,7 @@
     // Global state
     let filteredData = [];
     let currentType = 'all';
+    let currentOwner = 'all';
     let startDate = null;
     let endDate = null;
     let currentRange = 'all';
@@ -2076,6 +2083,14 @@
             });
         });
 
+        // Sales owner dropdown
+        const salesFilter = document.getElementById('sales-filter');
+        salesFilter.addEventListener('change', (event) => {
+            currentOwner = event.target.value;
+            currentPage = 1;
+            updateDashboard();
+        });
+
         // Custom Date Picker changes
         const startDateInput = document.getElementById('start-date');
         const endDateInput = document.getElementById('end-date');
@@ -2116,8 +2131,30 @@
         });
     }
 
+    function refreshSalesFilterOptions() {
+        const salesFilter = document.getElementById('sales-filter');
+        if (!salesFilter) return;
+
+        const owners = [...new Set(
+            CURRENT_DATABASE
+                .map(item => (item.owner || '').trim())
+                .filter(Boolean)
+        )].sort((a, b) => a.localeCompare(b, 'zh-CN'));
+
+        if (currentOwner !== 'all' && !owners.includes(currentOwner)) {
+            currentOwner = 'all';
+        }
+
+        salesFilter.innerHTML = [
+            '<option value="all">全部销售人员</option>',
+            ...owners.map(owner => `<option value="${escapeHtml(owner)}">${escapeHtml(owner)}</option>`)
+        ].join('');
+        salesFilter.value = currentOwner;
+    }
+
     // Full dashboard update
     function updateDashboard() {
+        refreshSalesFilterOptions();
         filterData();
         renderKPIs();
         renderCharts();
@@ -2211,6 +2248,7 @@
     function filterData() {
         filteredData = CURRENT_DATABASE.filter(item => {
             const matchType = (currentType === 'all' || item.card_type === currentType);
+            const matchOwner = (currentOwner === 'all' || item.owner === currentOwner);
             
             let matchDate = true;
             if (startDate || endDate) {
@@ -2233,7 +2271,7 @@
                 }
             }
             
-            return matchType && matchDate;
+            return matchType && matchOwner && matchDate;
         });
     }
 
