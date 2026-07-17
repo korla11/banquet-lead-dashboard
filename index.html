@@ -6,6 +6,20 @@
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <script>
+        (() => {
+            let activeTheme = null;
+            const applyTimeTheme = () => {
+                const hour = new Date().getHours();
+                const nextTheme = hour >= 6 && hour < 18 ? 'day' : 'night';
+                if (activeTheme && activeTheme !== nextTheme) window.location.reload();
+                activeTheme = nextTheme;
+                document.documentElement.dataset.theme = nextTheme;
+            };
+            applyTimeTheme();
+            window.setInterval(applyTimeTheme, 60000);
+        })();
+    </script>
     <title>盛世礼宴小宴会客资管理看板</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,6 +48,18 @@
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        html[data-theme="day"] {
+            --bg-color: #f4f1ea;
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --card-border: rgba(154, 111, 0, 0.22);
+            --card-border-hover: rgba(154, 111, 0, 0.48);
+            --text-primary: #1c1917;
+            --text-secondary: #57534e;
+            --gold: #b88713;
+            --gold-light: #8a6508;
+            --gold-glow: rgba(184, 135, 19, 0.18);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -59,6 +85,32 @@
             min-height: 100vh;
             padding: 2.5rem 2rem;
             line-height: 1.6;
+        }
+
+        html[data-theme="day"] body {
+            background-image:
+                radial-gradient(circle at 5% 5%, rgba(212, 175, 55, 0.13) 0%, transparent 35%),
+                radial-gradient(circle at 95% 95%, rgba(179, 143, 77, 0.1) 0%, transparent 40%);
+        }
+
+        html[data-theme="day"] .header-title h1,
+        html[data-theme="day"] .kpi-info .kpi-value {
+            background: linear-gradient(135deg, #1c1917 35%, #8a6508 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        html[data-theme="day"] .search-input,
+        html[data-theme="day"] .select-input,
+        html[data-theme="day"] .date-input,
+        html[data-theme="day"] .filter-btn {
+            color: #1c1917;
+            border-color: rgba(120, 113, 108, 0.24);
+            background: rgba(255, 255, 255, 0.84);
+        }
+
+        html[data-theme="day"] .login-overlay {
+            background: rgba(244, 241, 234, 0.94);
         }
 
         /* Container */

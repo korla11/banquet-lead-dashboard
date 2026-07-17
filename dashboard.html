@@ -6,6 +6,20 @@
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <script>
+        (() => {
+            let activeTheme = null;
+            const applyTimeTheme = () => {
+                const hour = new Date().getHours();
+                const nextTheme = hour >= 6 && hour < 18 ? 'day' : 'night';
+                if (activeTheme && activeTheme !== nextTheme) window.location.reload();
+                activeTheme = nextTheme;
+                document.documentElement.dataset.theme = nextTheme;
+            };
+            applyTimeTheme();
+            window.setInterval(applyTimeTheme, 60000);
+        })();
+    </script>
     <title>仪表盘 · 盛世礼宴小宴会</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,6 +35,16 @@
             --gold-light: #f6d98b;
             --text: #fafaf9;
             --muted: #a8a29e;
+        }
+
+        html[data-theme="day"] {
+            --bg: #f4f1ea;
+            --panel: rgba(255, 255, 255, 0.94);
+            --panel-border: rgba(154, 111, 0, 0.24);
+            --gold: #b88713;
+            --gold-light: #8a6508;
+            --text: #1c1917;
+            --muted: #57534e;
         }
 
         * {
