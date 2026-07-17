@@ -697,6 +697,46 @@
             box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.35);
         }
 
+        .task-list-toggle {
+            width: 100%;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.65rem 0.9rem;
+            border: 1px solid rgba(212, 175, 55, 0.28);
+            border-radius: 12px;
+            background: rgba(212, 175, 55, 0.07);
+            color: var(--gold-light);
+            font-size: 1rem;
+            font-weight: 650;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .task-list-toggle:hover {
+            border-color: rgba(212, 175, 55, 0.55);
+            background: rgba(212, 175, 55, 0.12);
+        }
+
+        .task-list-toggle svg {
+            flex: 0 0 auto;
+            transition: transform 0.25s ease;
+        }
+
+        .task-list-toggle[aria-expanded="true"] svg {
+            transform: rotate(180deg);
+        }
+
+        .task-list-content {
+            padding-top: 1.25rem;
+        }
+
+        .task-list-content[hidden] {
+            display: none;
+        }
+
         .target-tabs {
             display: flex;
             gap: 1rem;
@@ -1337,12 +1377,18 @@
 
     <!-- Targets & Progress -->
     <div class="target-section">
-        <div class="target-tabs">
-            <button class="target-tab-btn active" onclick="switchTargetTab('sales')">销售个人任务进度</button>
-            <button class="target-tab-btn" onclick="switchTargetTab('dept')">部门全年任务进度</button>
-        </div>
-        <div class="progress-list" id="target-progress-list">
-            <!-- Progress items dynamically loaded here -->
+        <button class="task-list-toggle" id="task-list-toggle" type="button" aria-expanded="false" aria-controls="task-list-content" onclick="toggleTaskList()">
+            <span>任务列表</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="task-list-content" id="task-list-content" hidden>
+            <div class="target-tabs">
+                <button class="target-tab-btn active" onclick="switchTargetTab('sales')">销售个人任务进度</button>
+                <button class="target-tab-btn" onclick="switchTargetTab('dept')">部门全年任务进度</button>
+            </div>
+            <div class="progress-list" id="target-progress-list">
+                <!-- Progress items dynamically loaded here -->
+            </div>
         </div>
     </div>
 
@@ -2127,6 +2173,14 @@
                 if (fill) fill.style.width = `${percentage}%`;
             }, 100);
         });
+    }
+
+    function toggleTaskList() {
+        const button = document.getElementById('task-list-toggle');
+        const content = document.getElementById('task-list-content');
+        const willOpen = content.hidden;
+        content.hidden = !willOpen;
+        button.setAttribute('aria-expanded', String(willOpen));
     }
 
     function switchTargetTab(tabName) {
