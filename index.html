@@ -3088,11 +3088,12 @@
         }
 
         let csvContent = "\uFEFF"; // UTF-8 BOM
-        csvContent += "自动编号,获客渠道,负责人,客户姓名,联系电话,原宴会类型,卡片分类,宴会日期,餐标套餐,卡片购买状态,登记时间,备注\n";
+        csvContent += "系统编号,实体卡号,获客渠道,负责人,客户姓名,联系电话,原宴会类型,卡片分类,宴会日期,餐标套餐,卡片购买状态,登记时间,备注\n";
 
         tableData.forEach(item => {
             const row = [
                 item.id,
+                item.physical_card_no || '',
                 item.channel,
                 item.owner,
                 item.name,
@@ -3104,7 +3105,7 @@
                 item.card_status,
                 item.reg_time,
                 item.remarks
-            ].map(val => `"${val.replace(/"/g, '""')}"`).join(",");
+            ].map(val => `"${String(val ?? '').replace(/"/g, '""')}"`).join(",");
             csvContent += row + "\n";
         });
 

@@ -149,7 +149,9 @@ function parseExcelBuffer(buffer) {
             return;
         }
         
-        const idIndex = headerMap["自动编号"] !== undefined ? headerMap["自动编号"] : 0;
+        const idIndex = headerMap["系统编号"] !== undefined
+            ? headerMap["系统编号"]
+            : (headerMap["自动编号"] !== undefined ? headerMap["自动编号"] : 0);
         const nameIndex = headerMap["客户姓名"] !== undefined ? headerMap["客户姓名"] : 3;
         const ownerIndex = headerMap["负责人"] !== undefined ? headerMap["负责人"] : 2;
         
@@ -167,6 +169,9 @@ function parseExcelBuffer(buffer) {
         const card_status = clean(row[headerMap["宴会卡购买状态"] !== undefined ? headerMap["宴会卡购买状态"] : 8]);
         const reg_time = clean(row[headerMap["登记时间"] !== undefined ? headerMap["登记时间"] : 9]);
         const remarks = clean(row[headerMap["备注"] !== undefined ? headerMap["备注"] : 10]);
+        const physical_card_no = headerMap["实体卡号"] !== undefined
+            ? clean(row[headerMap["实体卡号"]])
+            : "";
         
         let card_type = "生日卡";
         if (raw_type.includes("生日") || card_status.includes("生日")) {
@@ -187,7 +192,8 @@ function parseExcelBuffer(buffer) {
             package: package_val || "未选定",
             card_status: card_status || "未处理",
             reg_time: reg_time || "2026年7月13日",
-            remarks: remarks || "无"
+            remarks: remarks || "无",
+            physical_card_no: physical_card_no
         });
     });
     return parsedRecords;
