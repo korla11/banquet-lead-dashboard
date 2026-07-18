@@ -2919,7 +2919,7 @@
         const record = CURRENT_DATABASE.find(item => item.id === id);
         if (!record) return;
         
-        document.getElementById('modal-id').value = record.id || '';
+        document.getElementById('modal-id').value = record.physical_card_no || '';
         document.getElementById('modal-reg-time').value = record.reg_time || '';
         document.getElementById('modal-name').value = record.name || '';
         document.getElementById('modal-phone').value = record.phone || '';
@@ -2966,6 +2966,7 @@
         const package_val = document.getElementById('modal-package').value.trim();
         const card_status = document.getElementById('modal-card-status').value;
         const remarks = document.getElementById('modal-remarks').value.trim();
+        const physical_card_no = document.getElementById('modal-id').value.trim();
         
         if (!name) {
             alert("请输入客户姓名！");
@@ -2986,7 +2987,8 @@
             banquet_date: finalBanquetDate,
             package: package_val || "未约定",
             card_status: card_status,
-            remarks: remarks || "无"
+            remarks: remarks || "无",
+            physical_card_no: physical_card_no
         };
         
         try {
@@ -3130,8 +3132,8 @@
         </div>
         <div class="modal-body">
             <div class="form-group" id="modal-id-container">
-                <label for="modal-id" style="font-weight: 500;">自动编号</label>
-                <input type="text" id="modal-id" class="search-input" style="width: 100%; opacity: 0.6; cursor: not-allowed;" readonly disabled>
+                <label for="modal-id" style="font-weight: 500;">实体卡号</label>
+                <input type="text" id="modal-id" class="search-input" style="width: 100%;" placeholder="请输入实体卡号">
             </div>
             <div class="form-group" id="modal-reg-time-container">
                 <label for="modal-reg-time" style="font-weight: 500;">登记时间</label>
