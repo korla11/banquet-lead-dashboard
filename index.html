@@ -2973,15 +2973,10 @@
             alert("请输入客户姓名！");
             return;
         }
-        if (!phone) {
-            alert("请输入联系电话！");
-            return;
-        }
-        
         let finalBanquetDate = banquet_date || "未定";
         const updatedFields = {
             name: name,
-            phone: phone,
+            phone: phone || "未填",
             owner: owner,
             channel: channel || "手动录入",
             card_type: card_type,
@@ -3146,8 +3141,8 @@
                 <input type="text" id="modal-name" class="search-input" style="width: 100%;" placeholder="请输入客户姓名">
             </div>
             <div class="form-group">
-                <label for="modal-phone" style="font-weight: 500;">联系电话 <span style="color: var(--gold);">*</span></label>
-                <input type="text" id="modal-phone" class="search-input" style="width: 100%;" placeholder="请输入联系电话">
+                <label for="modal-phone" style="font-weight: 500;">联系电话（选填）</label>
+                <input type="text" id="modal-phone" class="search-input" style="width: 100%;" placeholder="可不填写联系电话">
             </div>
             <div class="form-group">
                 <label for="modal-owner" style="font-weight: 500;">负责人 <span style="color: var(--gold);">*</span></label>
